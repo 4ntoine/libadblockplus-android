@@ -1,0 +1,20 @@
+syntax: glob
+
+crowdin.yaml
+libadblockplus-android/libs/armeabi*
+libadblockplus-android/libs/x86
+.idea
+*.iml
+**/bin
+**/obj
+**/gen
+**/build
+**/local.properties
+**/ant.properties
+upload.py
+.DS_Store
+.*
+!.gitignore
+buildtools
+**/target
+!.hgignore

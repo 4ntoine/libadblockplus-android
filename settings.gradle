@@ -1,0 +1,4 @@
+include ':libadblockplus-android'
+include ':libadblockplus-android-webview'
+include ':libadblockplus-android-webviewapp'
+include ':libadblockplus-android-tests'

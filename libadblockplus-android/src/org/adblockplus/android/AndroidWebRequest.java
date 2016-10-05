@@ -94,35 +94,21 @@ public class AndroidWebRequest extends WebRequest
         final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
         final StringBuilder sb = new StringBuilder();
 
-        if (!this.elemhideEnabled && isListedSubscriptionUrl(url))
+        String line;
+        while ((line = reader.readLine()) != null)
         {
-          Log.d(TAG, "Removing element hiding rules from: '" + url + "'");
-
-          String line;
-          while ((line = reader.readLine()) != null)
+          // We're only appending non-element-hiding filters here.
+          //
+          // See:
+          //      https://issues.adblockplus.org/ticket/303
+          //
+          // Follow-up issue for removing this hack:
+          //      https://issues.adblockplus.org/ticket/1541
+          //
+          if (this.elemhideEnabled || !isListedSubscriptionUrl(url) || line.indexOf('#') == -1)
           {
-            // We're only appending non-element-hiding filters here.
-            //
-            // See:
-            //      https://issues.adblockplus.org/ticket/303
-            //
-            // Follow-up issue for removing this hack:
-            //      https://issues.adblockplus.org/ticket/1541
-            //
-            if (line.indexOf('#') == -1)
-            {
-              sb.append(line);
-              sb.append('\n');
-            }
-          }
-        }
-        else
-        {
-          int character;
-
-          while ((character = reader.read()) != -1)
-          {
-            sb.append((char) character);
+            sb.append(line);
+            sb.append('\n');
           }
         }
 
