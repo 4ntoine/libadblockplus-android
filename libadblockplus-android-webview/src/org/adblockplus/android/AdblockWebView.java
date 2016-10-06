@@ -210,11 +210,16 @@ public class AdblockWebView extends WebView
     {
       if (acceptableAdsSubscription != null)
       {
-        acceptableAdsSubscription.removeFromList();
-        acceptableAdsSubscription = null;
-        d("AA subscription removed");
+        removeAcceptableAdsSubscription();
       }
     }
+  }
+
+  private void removeAcceptableAdsSubscription()
+  {
+    acceptableAdsSubscription.removeFromList();
+    acceptableAdsSubscription = null;
+    d("AA subscription removed");
   }
 
   private boolean disposeFilterEngine;
@@ -247,18 +252,32 @@ public class AdblockWebView extends WebView
       return;
     }
 
-    if (filterEngine != null && disposeFilterEngine)
+    if (filterEngine != null)
     {
-      filterEngine.dispose();
+      if (acceptableAdsEnabled && acceptableAdsSubscription != null)
+      {
+        removeAcceptableAdsSubscription();
+      }
+
+      if (disposeFilterEngine)
+      {
+        filterEngine.dispose();
+      }
     }
 
     filterEngine = newFilterEngine;
     disposeFilterEngine = false;
 
-    if (newFilterEngine != null && jsEngine != null)
+    if (filterEngine != null)
     {
-      jsEngine.dispose();
+      applyAcceptableAds();
+
+      if (jsEngine != null)
+      {
+        jsEngine.dispose();
+      }
     }
+
     jsEngine = null;
   }
 
@@ -865,6 +884,12 @@ public class AdblockWebView extends WebView
     }
   }
 
+  private void clearReferers()
+  {
+    d("Clearing referers");
+    url2Referer.clear();
+  }
+
   /**
    * WebViewClient for API 21 and newer
    * (has Referer since it overrides `shouldInterceptRequest(..., request)` with referer)
@@ -883,7 +908,18 @@ public class AdblockWebView extends WebView
 
       if (referer != null)
       {
+        d("Remember referer " + referer + " for " + url);
         url2Referer.put(url, referer);
+      }
+      else
+      {
+        w("No referer for " + url);
+
+        if (request.isForMainFrame() && AdblockWebView.this.url != null)
+        {
+          d("Request is for main frame, adding current url " + AdblockWebView.this.url + " as referer");
+          url2Referer.put(url, AdblockWebView.this.url);
+        }
       }
 
       return super.shouldInterceptRequest(view, request);
@@ -1004,10 +1040,14 @@ public class AdblockWebView extends WebView
             String referer = url2Referer.get(url);
             if (referer != null)
             {
-              d("Referer for " + url + " is " + referer);
               referers = new String[] { referer };
             }
           }
+
+          d("Check whitelisting for " + url + " with " +
+            (referers.length > 0
+              ? "referer " + referers[0]
+              : "no referer"));
 
           if (filterEngine.isDocumentWhitelisted(url, referers) ||
             filterEngine.isElemhideWhitelisted(url, referers))
@@ -1241,8 +1281,7 @@ public class AdblockWebView extends WebView
 
     loading = false;
     stopPreventDrawing();
-
-    url2Referer.clear();
+    clearReferers();
 
     synchronized (elemHideThreadLockObject)
     {
@@ -1377,6 +1416,9 @@ public class AdblockWebView extends WebView
         d("Waiting for elemhide selectors to be ready");
         elemHideLatch.await();
         d("Elemhide selectors ready, " + elemHideSelectorsString.length() + " bytes");
+
+        clearReferers();
+
         return elemHideSelectorsString;
       }
       catch (InterruptedException e)
