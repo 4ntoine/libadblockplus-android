@@ -105,7 +105,7 @@ class Git():
     try:
       _ensure_line_exists(exclude_file, module)
     except IOError, e:
-      if e.errno != errno.ENOENT:
+      if e.errno != errno.ENOENT and e.errno != errno.ENOTDIR:
         raise
       logging.warning("File %s doesn't exist, skipping ignore" % exclude_file)
       return
