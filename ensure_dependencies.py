@@ -102,7 +102,13 @@ class Git():
   def ignore(self, target, repo):
     module = os.path.relpath(target, repo)
     exclude_file = os.path.join(repo, ".git", "info", "exclude")
-    _ensure_line_exists(exclude_file, module)
+    try:
+      _ensure_line_exists(exclude_file, module)
+    except IOError, e:
+      if e.errno != errno.ENOENT and e.errno != errno.ENOTDIR:
+        raise
+      logging.warning("File %s doesn't exist, skipping ignore" % exclude_file)
+      return
 
 repo_types = OrderedDict((
   ("hg", Mercurial()),
