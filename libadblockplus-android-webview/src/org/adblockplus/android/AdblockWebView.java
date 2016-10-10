@@ -88,12 +88,32 @@ public class AdblockWebView extends WebView
     return addDomListener;
   }
 
+  private boolean adBlockEnabled = true;
+
+  public boolean isAdBlockEnabled()
+  {
+    return adBlockEnabled;
+  }
+
+  private void applyAdblockEnabled()
+  {
+    super.setWebViewClient(adBlockEnabled ? intWebViewClient : extWebViewClient);
+    super.setWebChromeClient(adBlockEnabled ? intWebChromeClient : extWebChromeClient);
+  }
+
+  public void setAdBlockEnabled(boolean adBlockEnabled)
+  {
+    this.adBlockEnabled = adBlockEnabled;
+    applyAdblockEnabled();
+  }
+
   private WebChromeClient extWebChromeClient;
 
   @Override
   public void setWebChromeClient(WebChromeClient client)
   {
     extWebChromeClient = client;
+    applyAdblockEnabled();
   }
 
   private boolean debugMode;
@@ -617,6 +637,7 @@ public class AdblockWebView extends WebView
   public void setWebViewClient(WebViewClient client)
   {
     extWebViewClient = client;
+    applyAdblockEnabled();
   }
 
   private static final Pattern RE_JS = Pattern.compile("\\.js$", Pattern.CASE_INSENSITIVE);
@@ -931,7 +952,11 @@ public class AdblockWebView extends WebView
   private void initAbp()
   {
     addJavascriptInterface(this, BRIDGE);
+    initClients();
+  }
 
+  private void initClients()
+  {
     if (Build.VERSION.SDK_INT >= 21)
     {
       intWebViewClient = new AdblockWebViewClient21();
@@ -940,9 +965,7 @@ public class AdblockWebView extends WebView
     {
       intWebViewClient = new AdblockWebViewClient();
     }
-
-    super.setWebChromeClient(intWebChromeClient);
-    super.setWebViewClient(intWebViewClient);
+    applyAdblockEnabled();
   }
 
   /**
