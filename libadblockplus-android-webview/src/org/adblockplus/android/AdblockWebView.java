@@ -23,6 +23,7 @@ import org.adblockplus.libadblockplus.FilterEngine;
 import org.adblockplus.libadblockplus.JsEngine;
 import org.adblockplus.libadblockplus.Subscription;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -53,6 +54,7 @@ import android.webkit.JavascriptInterface; // makes android min version to be 17
 import android.webkit.WebViewClient;
 
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,6 +81,7 @@ public class AdblockWebView extends WebView
   @JavascriptInterface
   public void setAddDomListener(boolean value)
   {
+    d("addDomListener=" + value);
     this.addDomListener = value;
   }
 
@@ -173,6 +176,7 @@ public class AdblockWebView extends WebView
 
   private void runScript(String script)
   {
+    d("runScript started");
     if (Build.VERSION.SDK_INT >= 19)
     {
       evaluateJavascript(script, null);
@@ -181,6 +185,7 @@ public class AdblockWebView extends WebView
     {
       loadUrl("javascript:" + script);
     }
+    d("runScript finished");
   }
 
   private Subscription acceptableAdsSubscription;
@@ -529,6 +534,10 @@ public class AdblockWebView extends WebView
     @Override
     public boolean onConsoleMessage(ConsoleMessage consoleMessage)
     {
+      d("JS: level=" + consoleMessage.messageLevel()
+        + ", message=\"" + consoleMessage.message() + "\""
+        + ", line=" + consoleMessage.lineNumber());
+
       if (extWebChromeClient != null)
       {
         return extWebChromeClient.onConsoleMessage(consoleMessage);
@@ -852,18 +861,37 @@ public class AdblockWebView extends WebView
       }
     }
 
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, String url)
+    protected WebResourceResponse shouldInterceptRequest(
+      WebView webview, String url, boolean isMainFrame, String[] documentUrls)
     {
       // if dispose() was invoke, but the page is still loading then just let it go
       if (filterEngine == null)
       {
-        e("FilterEngine already disposed");
+        e("FilterEngine already disposed, allow loading");
+
+        // Allow loading by returning null
         return null;
       }
 
-      // Determine the content
-      FilterEngine.ContentType contentType = null;
+      if (isMainFrame)
+      {
+        // never blocking main frame requests, just subrequests
+        w(url + " is main frame, allow loading");
+
+        // allow loading by returning null
+        return null;
+      }
+
+      if (filterEngine.isDocumentWhitelisted(url, documentUrls))
+      {
+        w(url + " document is whitelisted, allow loading");
+
+        // allow loading by returning null
+        return null;
+      }
+
+      // determine the content
+      FilterEngine.ContentType contentType;
       if (RE_JS.matcher(url).find())
       {
         contentType = FilterEngine.ContentType.SCRIPT;
@@ -888,20 +916,66 @@ public class AdblockWebView extends WebView
       {
         contentType = FilterEngine.ContentType.OTHER;
       }
-      // Check if we should block ... we sadly do not have the referrer chain here,
-      // might also be hard to get as we do not have HTTP headers here
-      Filter filter = filterEngine.matches(url, contentType, new String[0]);
-      if (filter != null && filter.getType().equals(Filter.Type.BLOCKING))
+
+      // check if we should block
+      Filter filter = filterEngine.matches(url, contentType, documentUrls);
+      if (filter != null)
       {
-        w("Blocked loading " + url);
-        // If we should block, return empty response which results in a 404
-        return new WebResourceResponse("text/plain", "UTF-8", null);
+        if (filter.getType().equals(Filter.Type.BLOCKING))
+        {
+          w("Blocked loading " + url + " due to filter \"" + filter.toString() + "\"");
+
+          // If we should block, return empty response which results in 'errorLoading' callback
+          return new WebResourceResponse("text/plain", "UTF-8", null);
+        }
+        else
+        {
+          w(url + "is not blocked due to filter \"" + filter.toString() + "\" of type " + filter.getType());
+        }
+      }
+      else
+      {
+        d("No filter found for " + url);
       }
 
       d("Allowed loading " + url);
 
-      // Otherwise, continue by returning null
+      // continue by returning null
       return null;
+    }
+
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, String url)
+    {
+      // if dispose() was invoke, but the page is still loading then just let it go
+      if (filterEngine == null)
+      {
+        e("FilterEngine already disposed");
+        return null;
+      }
+
+      /*
+        we use hack - injecting Proxy instance instead of IoThreadClient and intercepting
+        `isForMainFrame` argument value, see `initIoThreadClient()`.
+
+        it's expected to be not `null` as first invocation goes to
+        https://android.googlesource.com/platform/external/chromium_org/+/android-4.4_r1/android_webview/java/src/org/chromium/android_webview/AwContents.java#235
+        and we intercept it by injecting our proxy instead of `IoThreadClientImpl`
+        and then it goes here
+        https://android.googlesource.com/platform/external/chromium_org/+/android-4.4_r1/android_webview/java/src/org/chromium/android_webview/AwContents.java#242
+      */
+      Boolean isMainFrame = IoThreadClientInvocationHandler.isMainFrame;
+      if (isMainFrame == null)
+      {
+        // the only reason for having null here is probably it failed to inject IoThreadClient proxy
+        isMainFrame = false;
+      }
+
+      // sadly we don't have request headers
+      // (and referer until android-21 and new callback with request (instead of just url) argument)
+      String[] referers = null;
+
+      return shouldInterceptRequest(view, url, isMainFrame, referers);
     }
   }
 
@@ -917,33 +991,33 @@ public class AdblockWebView extends WebView
    */
   class AdblockWebViewClient21 extends AdblockWebViewClient
   {
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
-    // makes android min version to be 21
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request)
     {
       // here we just trying to fill url -> referer map
       // blocking/allowing loading will happen in `shouldInterceptRequest(WebView,String)`
-
       String url = request.getUrl().toString();
       String referer = request.getRequestHeaders().get("Referer");
+      String[] referers;
 
       if (referer != null)
       {
-        d("Remember referer " + referer + " for " + url);
+        d("Header referer for " + url + " is " + referer);
         url2Referer.put(url, referer);
+
+        referers = new String[]
+        {
+          referer
+        };
       }
       else
       {
-        w("No referer for " + url);
-
-        if (request.isForMainFrame() && AdblockWebView.this.url != null)
-        {
-          d("Request is for main frame, adding current url " + AdblockWebView.this.url + " as referer");
-          url2Referer.put(url, AdblockWebView.this.url);
-        }
+        w("No referer header for " + url);
+        referers = EMPTY_ARRAY;
       }
 
-      return super.shouldInterceptRequest(view, request);
+      return shouldInterceptRequest(view, url, request.isForMainFrame(), referers);
     }
   }
 
@@ -953,6 +1027,57 @@ public class AdblockWebView extends WebView
   {
     addJavascriptInterface(this, BRIDGE);
     initClients();
+
+    if (Build.VERSION.SDK_INT < 21)
+    {
+      initIoThreadClient();
+    }
+  }
+
+  private synchronized void initIoThreadClient()
+  {
+    final Object awContents = ReflectionUtils.extractProperty(this, new String[]
+      {
+        "mProvider",
+        "mAwContents"
+      });
+
+    final String ioThreadClientProperty = "mIoThreadClient";
+    final Object originalClient = ReflectionUtils.extractProperty(
+      awContents,
+      new String[]
+      {
+        ioThreadClientProperty
+      });
+
+    // avoid injecting twice (already injected Proxy instance has another class name)
+    if (!originalClient.getClass().getSimpleName().startsWith("$Proxy"))
+    {
+      Object proxyClient = Proxy.newProxyInstance(
+        originalClient.getClass().getClassLoader(),
+        originalClient.getClass().getInterfaces(),
+        new IoThreadClientInvocationHandler(originalClient));
+
+      // inject proxy instead of original client
+      boolean injected = ReflectionUtils.injectProperty(awContents, ioThreadClientProperty, proxyClient);
+      if (injected)
+      {
+        Integer mNativeAwContents = (Integer) ReflectionUtils.extractProperty(awContents, "mNativeAwContents");
+        Object mWebContentsDelegate = ReflectionUtils.extractProperty(awContents, "mWebContentsDelegate");
+        Object mContentsClientBridge = ReflectionUtils.extractProperty(awContents, "mContentsClientBridge");
+        Object mInterceptNavigationDelegate = ReflectionUtils.extractProperty(awContents, "mInterceptNavigationDelegate");
+
+        boolean invoked = ReflectionUtils.invokeMethod(awContents, "nativeSetJavaPeers", new Object[]
+          {
+            mNativeAwContents, awContents, mWebContentsDelegate,
+            mContentsClientBridge, proxyClient, mInterceptNavigationDelegate
+          });
+        if (!invoked)
+        {
+          e("Failed to inject IoThreadClient proxy");
+        }
+      }
+    }
   }
 
   private void initClients()
@@ -1030,6 +1155,8 @@ public class AdblockWebView extends WebView
   private Object elemHideThreadLockObject = new Object();
   private ElemHideThread elemHideThread;
 
+  private static final String[] EMPTY_ARRAY = new String[] {};
+
   private class ElemHideThread extends Thread
   {
     private String selectorsString;
@@ -1041,8 +1168,6 @@ public class AdblockWebView extends WebView
       this.finishedLatch = finishedLatch;
       isCancelled = new AtomicBoolean(false);
     }
-
-    private String[] EMPTY_ARRAY = new String[] {};
 
     @Override
     public void run()
@@ -1056,35 +1181,38 @@ public class AdblockWebView extends WebView
         }
         else
         {
-
-          String[] referers = EMPTY_ARRAY;
-          if (url != null)
+          String[] referers = new String[]
           {
-            String referer = url2Referer.get(url);
-            if (referer != null)
-            {
-              referers = new String[] { referer };
-            }
+            url
+          };
+
+          d("Check whitelisting for " + url);
+
+          if (filterEngine.isDocumentWhitelisted(url, referers))
+          {
+            w("Whitelisted " + url + " for document");
+            selectorsString = EMPTY_ELEMHIDE_ARRAY_STRING;
           }
-
-          d("Check whitelisting for " + url + " with " +
-            (referers.length > 0
-              ? "referer " + referers[0]
-              : "no referer"));
-
-          if (filterEngine.isDocumentWhitelisted(url, referers) ||
-            filterEngine.isElemhideWhitelisted(url, referers))
+          else if (filterEngine.isElemhideWhitelisted(url, referers))
           {
-            w("Whitelisted " + url);
+            w("Whitelisted " + url + " for elemhide");
             selectorsString = EMPTY_ELEMHIDE_ARRAY_STRING;
           }
           else
           {
-            d("Listed subscriptions: " + filterEngine.getListedSubscriptions().size());
+            List<Subscription> subscriptions = filterEngine.getListedSubscriptions();
+            d("Listed subscriptions: " + subscriptions.size());
+            if (debugMode)
+            {
+              for (Subscription eachSubscription : subscriptions)
+              {
+                d("Subscribed to " + eachSubscription);
+              }
+            }
 
-            d("Requesting elemhide selectors from FilterEngine for " + domain);
+            d("Requesting elemhide selectors from FilterEngine for " + domain + " in " + this);
             List<String> selectors = filterEngine.getElementHidingSelectors(domain);
-            d("Finished requesting elemhide selectors, got " + selectors.size());
+            d("Finished requesting elemhide selectors, got " + selectors.size() + " in " + this);
             selectorsString = Utils.stringListToJsonArray(selectors);
           }
         }
@@ -1236,6 +1364,19 @@ public class AdblockWebView extends WebView
     }
 
     super.goForward();
+  }
+
+  @Override
+  public void reload()
+  {
+    initAbpLoading();
+
+    if (loading)
+    {
+      stopAbpLoading();
+    }
+
+    super.reload();
   }
 
   @Override
