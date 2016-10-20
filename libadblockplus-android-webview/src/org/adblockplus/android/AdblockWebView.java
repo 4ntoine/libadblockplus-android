@@ -55,7 +55,6 @@ import android.webkit.WebViewClient;
 
 import java.io.IOException;
 import java.lang.reflect.Proxy;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +70,71 @@ import java.util.regex.Pattern;
 public class AdblockWebView extends WebView
 {
   private static final String TAG = Utils.getTag(AdblockWebView.class);
+
+  /**
+   * Build app info using Android package information
+   * @param context context
+   * @param developmentBuild if it's dev build
+   * @return app info required to build JsEngine
+   */
+  public static AppInfo buildAppInfo(final Context context, boolean developmentBuild)
+  {
+    String version = "0";
+    try
+    {
+      final PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+      version = info.versionName;
+      if (developmentBuild)
+      {
+        version += "." + info.versionCode;
+      }
+    }
+    catch (final PackageManager.NameNotFoundException e)
+    {
+      Log.e(TAG, "Failed to get the application version number", e);
+    }
+    final String sdkVersion = String.valueOf(Build.VERSION.SDK_INT);
+    final String locale = Locale.getDefault().toString().replace('_', '-');
+
+    return AppInfo.builder()
+      .setVersion(version)
+      .setApplicationVersion(sdkVersion)
+      .setLocale(locale)
+      .setDevelopmentBuild(developmentBuild)
+      .build();
+  }
+
+  /**
+   * Build JsEngine required to build FilterEngine
+   * @param context context
+   * @param developmentBuild if it's dev build
+   * @return JsEngine
+   */
+  public static JsEngine buildJsEngine(Context context, boolean developmentBuild)
+  {
+    JsEngine jsEngine = new JsEngine(buildAppInfo(context, developmentBuild));
+    jsEngine.setDefaultFileSystem(context.getCacheDir().getAbsolutePath());
+    jsEngine.setWebRequest(new AndroidWebRequest(true)); // 'true' because we need element hiding
+    return jsEngine;
+  }
+
+  public AdblockWebView(Context context)
+  {
+    super(context);
+    initAbp();
+  }
+
+  public AdblockWebView(Context context, AttributeSet attrs)
+  {
+    super(context, attrs);
+    initAbp();
+  }
+
+  public AdblockWebView(Context context, AttributeSet attrs, int defStyle)
+  {
+    super(context, attrs, defStyle);
+    initAbp();
+  }
 
   private volatile boolean addDomListener = true;
 
@@ -661,7 +725,7 @@ public class AdblockWebView extends WebView
    * WebViewClient for API pre 21
    * (does not have Referers information)
    */
-  class AdblockWebViewClient extends WebViewClient
+  private class AdblockWebViewClient extends WebViewClient
   {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url)
@@ -947,13 +1011,6 @@ public class AdblockWebView extends WebView
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url)
     {
-      // if dispose() was invoke, but the page is still loading then just let it go
-      if (filterEngine == null)
-      {
-        e("FilterEngine already disposed");
-        return null;
-      }
-
       /*
         we use hack - injecting Proxy instance instead of IoThreadClient and intercepting
         `isForMainFrame` argument value, see `initIoThreadClient()`.
@@ -989,7 +1046,7 @@ public class AdblockWebView extends WebView
    * WebViewClient for API 21 and newer
    * (has Referer since it overrides `shouldInterceptRequest(..., request)` with referer)
    */
-  class AdblockWebViewClient21 extends AdblockWebViewClient
+  private class AdblockWebViewClient21 extends AdblockWebViewClient
   {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -1037,10 +1094,10 @@ public class AdblockWebView extends WebView
   private synchronized void initIoThreadClient()
   {
     final Object awContents = ReflectionUtils.extractProperty(this, new String[]
-      {
-        "mProvider",
-        "mAwContents"
-      });
+    {
+      "mProvider",
+      "mAwContents"
+    });
 
     final String ioThreadClientProperty = "mIoThreadClient";
     final Object originalClient = ReflectionUtils.extractProperty(
@@ -1059,19 +1116,25 @@ public class AdblockWebView extends WebView
         new IoThreadClientInvocationHandler(originalClient));
 
       // inject proxy instead of original client
-      boolean injected = ReflectionUtils.injectProperty(awContents, ioThreadClientProperty, proxyClient);
+      boolean injected = ReflectionUtils.injectProperty(awContents, ioThreadClientProperty,
+        proxyClient);
       if (injected)
       {
-        Integer mNativeAwContents = (Integer) ReflectionUtils.extractProperty(awContents, "mNativeAwContents");
-        Object mWebContentsDelegate = ReflectionUtils.extractProperty(awContents, "mWebContentsDelegate");
-        Object mContentsClientBridge = ReflectionUtils.extractProperty(awContents, "mContentsClientBridge");
-        Object mInterceptNavigationDelegate = ReflectionUtils.extractProperty(awContents, "mInterceptNavigationDelegate");
+        // after we injected it as field we should pass it to native code as invocation comes from it
+        Integer mNativeAwContents = (Integer) ReflectionUtils.extractProperty(awContents,
+          "mNativeAwContents");
+        Object mWebContentsDelegate = ReflectionUtils.extractProperty(awContents,
+          "mWebContentsDelegate");
+        Object mContentsClientBridge = ReflectionUtils.extractProperty(awContents,
+          "mContentsClientBridge");
+        Object mInterceptNavigationDelegate = ReflectionUtils.extractProperty(awContents,
+          "mInterceptNavigationDelegate");
 
         boolean invoked = ReflectionUtils.invokeMethod(awContents, "nativeSetJavaPeers", new Object[]
-          {
-            mNativeAwContents, awContents, mWebContentsDelegate,
-            mContentsClientBridge, proxyClient, mInterceptNavigationDelegate
-          });
+        {
+          mNativeAwContents, awContents, mWebContentsDelegate,
+          mContentsClientBridge, proxyClient, mInterceptNavigationDelegate
+        });
         if (!invoked)
         {
           e("Failed to inject IoThreadClient proxy");
@@ -1091,51 +1154,6 @@ public class AdblockWebView extends WebView
       intWebViewClient = new AdblockWebViewClient();
     }
     applyAdblockEnabled();
-  }
-
-  /**
-   * Build app info using Android package information
-   * @param context context
-   * @param developmentBuild if it's dev build
-   * @return app info required to build JsEngine
-   */
-  public static AppInfo buildAppInfo(final Context context, boolean developmentBuild)
-  {
-    String version = "0";
-    try
-    {
-      final PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-      version = info.versionName;
-      if (developmentBuild)
-        version += "." + info.versionCode;
-    }
-    catch (final PackageManager.NameNotFoundException e)
-    {
-      Log.e(TAG, "Failed to get the application version number", e);
-    }
-    final String sdkVersion = String.valueOf(Build.VERSION.SDK_INT);
-    final String locale = Locale.getDefault().toString().replace('_', '-');
-
-    return AppInfo.builder()
-      .setVersion(version)
-      .setApplicationVersion(sdkVersion)
-      .setLocale(locale)
-      .setDevelopmentBuild(developmentBuild)
-      .build();
-  }
-
-  /**
-   * Build JsEngine required to build FilterEngine
-   * @param context context
-   * @param developmentBuild if it's dev build
-   * @return JsEngine
-   */
-  public static JsEngine buildJsEngine(Context context, boolean developmentBuild)
-  {
-    JsEngine jsEngine = new JsEngine(buildAppInfo(context, developmentBuild));
-    jsEngine.setDefaultFileSystem(context.getCacheDir().getAbsolutePath());
-    jsEngine.setWebRequest(new AndroidWebRequest(true)); // 'true' because we need element hiding
-    return jsEngine;
   }
 
   private void createFilterEngine()
@@ -1310,12 +1328,16 @@ public class AdblockWebView extends WebView
     {
       try
       {
-        domain = Utils.getDomain(url);
+        domain = filterEngine.getHostFromURL(url);
+        if (domain == null)
+        {
+          throw new RuntimeException("Failed to extract domain from " + url);
+        }
+
+        d("Extracted domain " + domain + " from " + url);
       }
-      catch (URISyntaxException e)
-      {
-        domain = null;
-        e("Failed to extract domain for " + url);
+      catch (Throwable t) {
+        e("Failed to extract domain from " + url, t);
       }
 
       elemHideLatch = new CountDownLatch(1);
@@ -1492,24 +1514,6 @@ public class AdblockWebView extends WebView
   {
     handler.removeCallbacks(allowDrawRunnable);
     super.onPause();
-  }
-
-  public AdblockWebView(Context context)
-  {
-    super(context);
-    initAbp();
-  }
-
-  public AdblockWebView(Context context, AttributeSet attrs)
-  {
-    super(context, attrs);
-    initAbp();
-  }
-
-  public AdblockWebView(Context context, AttributeSet attrs, int defStyle)
-  {
-    super(context, attrs, defStyle);
-    initAbp();
   }
 
   // used to prevent user see flickering for elements to hide
