@@ -15,7 +15,7 @@
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.adblockplus.android;
+package org.adblockplus.libadblockplus.android;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

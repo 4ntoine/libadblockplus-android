@@ -15,7 +15,7 @@
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.adblockplus.android;
+package org.adblockplus.libadblockplus.android;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -103,21 +103,6 @@ public final class Utils
     }
 
     return array.toString();
-  }
-
-  /**
-   * Extract domain from URL
-   * @param url valid URL (with scheme)
-   * @return domain
-   * @throws URISyntaxException
-   */
-  public static String getDomain(String url) throws URISyntaxException
-  {
-    URI uri = new URI(url);
-    String domain = uri.getHost();
-    if (domain == null)
-      throw new URISyntaxException(url, "Invalid url");
-    return domain.startsWith("www.") ? domain.substring(4) : domain;
   }
 
   public static String readAssetAsString(Context context, String filename) throws IOException

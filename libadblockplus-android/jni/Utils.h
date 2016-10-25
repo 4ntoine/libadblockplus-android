@@ -148,6 +148,7 @@ inline T* JniLongToTypePtr(jlong value)
 }
 
 std::string JniJavaToStdString(JNIEnv* env, jstring str);
+jstring JniStdStringToJava(JNIEnv* env, std::string str);
 
 void JniAddObjectToList(JNIEnv* env, jobject list, jobject value);
 

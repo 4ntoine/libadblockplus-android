@@ -15,7 +15,7 @@
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.adblockplus.android;
+package org.adblockplus.libadblockplus.android.webview;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

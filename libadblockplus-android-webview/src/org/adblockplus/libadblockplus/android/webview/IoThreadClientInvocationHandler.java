@@ -15,12 +15,15 @@
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.adblockplus.android;
+package org.adblockplus.libadblockplus.android.webview;
 
 import android.util.Log;
 
+import org.adblockplus.libadblockplus.android.Utils;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 
 public class IoThreadClientInvocationHandler implements InvocationHandler
 {

@@ -1,6 +1,6 @@
 package org.adblockplus.libadblockplus.tests;
 
-import org.adblockplus.android.Utils;
+import org.adblockplus.libadblockplus.android.Utils;
 import org.junit.Test;
 
 import java.util.Arrays;

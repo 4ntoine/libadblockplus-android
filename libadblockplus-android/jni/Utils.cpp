@@ -33,6 +33,11 @@ std::string JniJavaToStdString(JNIEnv* env, jstring str)
   return ret;
 }
 
+jstring JniStdStringToJava(JNIEnv* env, std::string str)
+{
+  return env->NewStringUTF(str.c_str());
+}
+
 jobject NewJniArrayList(JNIEnv* env)
 {
   JniLocalReference<jclass> clazz(env, env->FindClass("java/util/ArrayList"));

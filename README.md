@@ -153,7 +153,7 @@ You can find 'AdblockWebView' class in 'libadblockplus-android-webview' director
 
 In layout XML:
 
-    <org.adblockplus.android.AdblockWebView
+    <org.adblockplus.libadblockplus.android.webview.AdblockWebView
         android:id="@+id/main_webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
@@ -162,16 +162,17 @@ In java source code:
 
     AdblockWebView webView = (AdblockWebView) findViewById(R.id.main_webview);
 
+Use `setAdblockEnabled(boolean adblockEnabled)` to enable/disable adblocking.
+
 Use `setDebugMode(boolean debugMode)` to turn debug log output (Android log and JS console) on/off.
 
 Use `setAllowDrawDelay(int allowDrawDelay)` to set custom delay to start render webpage after 'DOMContentLoaded' event is fired.
 
-Use `setFilterEngine(FilterEngine newFilterEngine)` to use external filter engine
-If filter engine is not set, it's created by AdblockWebView instance automatically.
+Use `setAdblockEngine(AdblockEngine adblockEngine)` to use external adblock engine
+If adblock engine is not set, it's created by AdblockWebView instance automatically.
 
-Use `setAcceptableAdsEnabled(boolean enabled)` to enable/disable Acceptable Ads.
-
-Use `dispose()` to release resources (**required**).
+Use `dispose(Runnable disposeFinished)` to release resources (**required**).
+Note it can be invoked from background thread.
 
 ### Building
 

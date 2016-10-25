@@ -39,11 +39,24 @@
 
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/main_aa"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/main_aa"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:id="@+id/main_abp_enabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/main_abp"/>
+
+        <CheckBox
+            android:id="@+id/main_aa_enabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/main_aa"/>
+
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/main_progress"
@@ -54,7 +67,7 @@
         android:indeterminateOnly="false"
         android:max="100"/>
 
-    <org.adblockplus.android.AdblockWebView
+    <org.adblockplus.libadblockplus.android.webview.AdblockWebView
         android:id="@+id/main_webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

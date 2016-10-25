@@ -6,13 +6,13 @@
     <modelVersion>4.0.0</modelVersion>	
 
     <parent>
-        <groupId>org.adblockplus</groupId>
-        <artifactId>libadblockplus-android-parent</artifactId>
+        <groupId>org.adblockplus.libadblockplus.android</groupId>
+        <artifactId>parent</artifactId>
         <version>1.0</version>
     </parent>
 
-    <groupId>org.adblockplus</groupId>
-    <artifactId>libadblockplus-android-webview</artifactId>
+    <groupId>org.adblockplus.libadblockplus.android</groupId>
+    <artifactId>webview</artifactId>
     <version>${selfVersion}</version>
     <packaging>aar</packaging>
     <name>libadblockplus-android-webview</name>
@@ -29,8 +29,8 @@
 
         <!-- library -->
         <dependency>
-            <groupId>org.adblockplus</groupId>
-            <artifactId>libadblockplus-android</artifactId>
+            <groupId>org.adblockplus.libadblockplus.android</groupId>
+            <artifactId>library</artifactId>
             <version>${selfVersion}</version>
             <type>aar</type>
         </dependency>
@@ -48,7 +48,6 @@
                 <configuration>
                     <sdk>
                         <platform>21</platform>
-                        <!-- <buildTools>${buildTools}</buildTools> -->
                     </sdk>
                     <ndk>
                         <path>${env.ANDROID_NDK_HOME}</path>
