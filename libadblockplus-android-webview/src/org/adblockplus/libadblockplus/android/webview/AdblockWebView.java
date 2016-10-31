@@ -52,6 +52,8 @@ import org.adblockplus.libadblockplus.android.Utils;
 
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -810,7 +812,7 @@ public class AdblockWebView extends WebView
       {
         e("FilterEngine already disposed, allow loading");
 
-        // Allow loading by returning null
+        // allow loading by returning null
         return null;
       }
 
@@ -818,6 +820,15 @@ public class AdblockWebView extends WebView
       {
         // never blocking main frame requests, just subrequests
         w(url + " is main frame, allow loading");
+
+        // allow loading by returning null
+        return null;
+      }
+
+      // whitelisted
+      if (adblockEngine.isDomainWhitelisted(url, referrerChainArray))
+      {
+        w(url + " domain is whitelisted, allow loading");
 
         // allow loading by returning null
         return null;
@@ -1488,7 +1499,7 @@ public class AdblockWebView extends WebView
   /**
    * Dispose AdblockWebView and internal adblockEngine if it was created
    * If external AdblockEngine was passed using `setAdblockEngine()` it should be disposed explicitly
-   * Warning: runnable may be launched in background thread
+   * Warning: runnable can be invoked from background thread
    * @param disposeFinished runnable to run when AdblockWebView is disposed
    */
   public void dispose(final Runnable disposeFinished)
@@ -1496,6 +1507,7 @@ public class AdblockWebView extends WebView
     d("Dispose invoked");
 
     removeJavascriptInterface(BRIDGE);
+    adblockEngine = null;
 
     DisposeRunnable disposeRunnable = new DisposeRunnable(disposeFinished);
     synchronized (elemHideThreadLockObject)

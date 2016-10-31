@@ -18,6 +18,7 @@
     <modules>
         <module>libadblockplus-android</module>
         <module>libadblockplus-android-webview</module>
+        <module>libadblockplus-android-settings</module>
         <module>libadblockplus-android-webviewapp</module>
     </modules>
     

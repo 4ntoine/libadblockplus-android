@@ -6,55 +6,42 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <EditText
+        android:id="@+id/main_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="http://www.google.com"
+        android:inputType="textUri"
+        android:singleLine="true"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/main_url"
-            android:layout_width="0px"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="http://www.google.com"
-            android:singleLine="true"/>
-
         <Button
             android:id="@+id/main_ok"
-            android:layout_width="50dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/main_ok"/>
 
         <Button
             android:id="@+id/main_back"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:text="@string/main_prev"/>
 
         <Button
             android:id="@+id/main_forward"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:text="@string/main_next"/>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <CheckBox
-            android:id="@+id/main_abp_enabled"
+        <Button
+            android:id="@+id/main_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/main_abp"/>
-
-        <CheckBox
-            android:id="@+id/main_aa_enabled"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/main_aa"/>
+            android:text="@string/main_settings"/>
 
     </LinearLayout>
 

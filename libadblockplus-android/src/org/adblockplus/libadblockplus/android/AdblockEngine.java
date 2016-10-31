@@ -18,8 +18,12 @@
 package org.adblockplus.libadblockplus.android;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.adblockplus.libadblockplus.AppInfo;
 import org.adblockplus.libadblockplus.Filter;
@@ -27,7 +31,9 @@ import org.adblockplus.libadblockplus.FilterChangeCallback;
 import org.adblockplus.libadblockplus.FilterEngine;
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.adblockplus.libadblockplus.JsEngine;
+import org.adblockplus.libadblockplus.JsValue;
 import org.adblockplus.libadblockplus.LogSystem;
+import org.adblockplus.libadblockplus.Notification;
 import org.adblockplus.libadblockplus.ShowNotificationCallback;
 import org.adblockplus.libadblockplus.Subscription;
 import org.adblockplus.libadblockplus.UpdateAvailableCallback;
@@ -97,13 +103,55 @@ public final class AdblockEngine
         .build();
   }
 
-  public static AdblockEngine create(final Context context, final AppInfo appInfo, final String basePath)
+  public static final UpdateAvailableCallback UPDATE_AVAILABLE_CALLBACK =
+    new UpdateAvailableCallback()
   {
-    return create(context, appInfo, basePath, false);
-  }
+    @Override
+    public void updateAvailableCallback(String url)
+    {
+      Log.d(TAG, "Update available for " + url);
+    }
+  };
 
-  public static AdblockEngine create(final Context context, final AppInfo appInfo, final String basePath, boolean enableElemhide)
+  public static final UpdateCheckDoneCallback UPDATE_CHECK_DONE_CALLBACK =
+    new UpdateCheckDoneCallback()
   {
+    @Override
+    public void updateCheckDoneCallback(String error)
+    {
+      Log.d(TAG, "Update check done, error: " + error);
+    }
+  };
+
+  public static final ShowNotificationCallback SHOW_NOTIFICATION_CALLBACK =
+    new ShowNotificationCallback()
+  {
+    @Override
+    public void showNotificationCallback(Notification jsValue)
+    {
+      Log.d(TAG, "Notification: " + jsValue);
+    }
+  };
+
+  public static final FilterChangeCallback FILTER_CHANGE_CALLBACK =
+    new FilterChangeCallback()
+  {
+    @Override
+    public void filterChangeCallback(String action, JsValue jsValue)
+    {
+      Log.d(TAG, "Filter changed: " + action + (!jsValue.isUndefined() ? ", " + jsValue : ""));
+    }
+  };
+
+  public static AdblockEngine create(final Context context, final AppInfo appInfo,
+                                     final String basePath, boolean enableElemhide,
+                                     UpdateAvailableCallback updateAvailableCallback,
+                                     UpdateCheckDoneCallback updateCheckDoneCallback,
+                                     ShowNotificationCallback showNotificationCallback,
+                                     FilterChangeCallback filterChangeCallback)
+  {
+    Log.w(TAG, "Create");
+
     final AdblockEngine engine = new AdblockEngine(context, enableElemhide);
 
     engine.jsEngine = new JsEngine(appInfo);
@@ -117,13 +165,43 @@ public final class AdblockEngine
 
     engine.filterEngine = new FilterEngine(engine.jsEngine);
 
+    engine.updateAvailableCallback = updateAvailableCallback;
+    if (engine.updateAvailableCallback != null)
+    {
+      engine.filterEngine.setUpdateAvailableCallback(updateAvailableCallback);
+    }
+
+    engine.updateCheckDoneCallback = updateCheckDoneCallback;
+
+    engine.showNotificationCallback = showNotificationCallback;
+    if (engine.showNotificationCallback != null)
+    {
+      engine.filterEngine.setShowNotificationCallback(showNotificationCallback);
+    }
+
+    engine.filterChangeCallback = filterChangeCallback;
+    if (engine.filterChangeCallback != null)
+    {
+      engine.filterEngine.setFilterChangeCallback(filterChangeCallback);
+    }
+
     engine.webRequest.updateSubscriptionURLs(engine.filterEngine);
 
     return engine;
   }
 
+  public static AdblockEngine create(final Context context, final AppInfo appInfo,
+                                     final String basePath, boolean elemhideEnabled)
+  {
+    return create(context, appInfo, basePath, elemhideEnabled,
+      UPDATE_AVAILABLE_CALLBACK, UPDATE_CHECK_DONE_CALLBACK,
+      SHOW_NOTIFICATION_CALLBACK, FILTER_CHANGE_CALLBACK);
+  }
+
   public void dispose()
   {
+    Log.w(TAG, "Dispose");
+
     // Safe disposing (just in case)
     if (this.filterEngine != null)
     {
@@ -184,17 +262,71 @@ public final class AdblockEngine
     return this.elemhideEnabled;
   }
 
-  public void setSubscription(final String url)
+  private static org.adblockplus.libadblockplus.android.Subscription convertJsSubscription(final Subscription jsSubscription)
+  {
+    final org.adblockplus.libadblockplus.android.Subscription subscription =
+      new org.adblockplus.libadblockplus.android.Subscription();
+
+    subscription.title = jsSubscription.getProperty("title").toString();
+    subscription.url = jsSubscription.getProperty("url").toString();
+
+    return subscription;
+  }
+
+  private static org.adblockplus.libadblockplus.android.Subscription[] convertJsSubscriptions(
+    final List<Subscription> jsSubscriptions)
+  {
+    final org.adblockplus.libadblockplus.android.Subscription[] subscriptions =
+      new org.adblockplus.libadblockplus.android.Subscription[jsSubscriptions.size()];
+
+    for (int i = 0; i < subscriptions.length; i++)
+    {
+      subscriptions[i] = convertJsSubscription(jsSubscriptions.get(i));
+    }
+
+    return subscriptions;
+  }
+
+  public org.adblockplus.libadblockplus.android.Subscription[] getRecommendedSubscriptions()
+  {
+    return convertJsSubscriptions(this.filterEngine.fetchAvailableSubscriptions());
+  }
+
+  public org.adblockplus.libadblockplus.android.Subscription[] getListedSubscriptions()
+  {
+    return convertJsSubscriptions(this.filterEngine.getListedSubscriptions());
+  }
+
+  public void clearSubscriptions()
   {
     for (final Subscription s : this.filterEngine.getListedSubscriptions())
     {
       s.removeFromList();
     }
+  }
+
+  public void setSubscription(final String url)
+  {
+    clearSubscriptions();
 
     final Subscription sub = this.filterEngine.getSubscription(url);
     if (sub != null)
     {
       sub.addToList();
+    }
+  }
+
+  public void setSubscriptions(Collection<String> urls)
+  {
+    clearSubscriptions();
+
+    for (String eachUrl : urls)
+    {
+      final Subscription sub = this.filterEngine.getSubscription(eachUrl);
+      if (sub != null)
+      {
+        sub.addToList();
+      }
     }
   }
 
@@ -208,7 +340,7 @@ public final class AdblockEngine
 
   public boolean isAcceptableAdsEnabled()
   {
-    final String url = this.filterEngine.getPref("subscriptions_exceptionsurl").toString();
+    final String url = getAcceptableAdsSubscriptionURL();
     List<Subscription> subscriptions = this.filterEngine.getListedSubscriptions();
     for (Subscription eachSubscription : subscriptions)
     {
@@ -220,9 +352,26 @@ public final class AdblockEngine
     return false;
   }
 
+  private volatile boolean enabled = true;
+
+  public void setEnabled(final boolean enabled)
+  {
+    this.enabled = enabled;
+  }
+
+  public boolean isEnabled()
+  {
+    return enabled;
+  }
+
+  public String getAcceptableAdsSubscriptionURL()
+  {
+    return this.filterEngine.getPref("subscriptions_exceptionsurl").toString();
+  }
+
   public void setAcceptableAdsEnabled(final boolean enabled)
   {
-    final String url = this.filterEngine.getPref("subscriptions_exceptionsurl").toString();
+    final String url = getAcceptableAdsSubscriptionURL();
     final Subscription sub = this.filterEngine.getSubscription(url);
     if (sub != null)
     {
@@ -244,6 +393,11 @@ public final class AdblockEngine
 
   public boolean matches(final String fullUrl, final ContentType contentType, final String[] referrerChainArray)
   {
+    if (!enabled)
+    {
+      return false;
+    }
+
     final Filter filter = this.filterEngine.matches(fullUrl, contentType, referrerChainArray);
 
     if (filter == null)
@@ -271,6 +425,32 @@ public final class AdblockEngine
     return this.filterEngine.isDocumentWhitelisted(url, referrerChainArray);
   }
 
+  public boolean isDomainWhitelisted(final String url, final String[] referrerChainArray)
+  {
+    if (whitelistedDomains == null)
+    {
+      return false;
+    }
+
+    // using Set to remove duplicates
+    Set<String> referrersAndResourceUrls = new HashSet<String>();
+    if (referrerChainArray != null)
+    {
+      referrersAndResourceUrls.addAll(Arrays.asList(referrerChainArray));
+    }
+    referrersAndResourceUrls.add(url);
+
+    for (String eachUrl : referrersAndResourceUrls)
+    {
+      if (whitelistedDomains.contains(filterEngine.getHostFromURL(eachUrl)))
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public boolean isElemhideWhitelisted(final String url, final String[] referrerChainArray)
   {
     return this.filterEngine.isElemhideWhitelisted(url, referrerChainArray);
@@ -292,7 +472,9 @@ public final class AdblockEngine
      * the given URL and returns an empty list if so. This is needed to
      * ensure correct functioning of e.g. acceptable ads.
      */
-    if (!this.elemhideEnabled
+    if (!this.enabled
+        || !this.elemhideEnabled
+        || this.isDomainWhitelisted(url, referrerChainArray)
         || this.isDocumentWhitelisted(url, referrerChainArray)
         || this.isElemhideWhitelisted(url, referrerChainArray))
     {
@@ -309,5 +491,17 @@ public final class AdblockEngine
   public FilterEngine getFilterEngine()
   {
     return this.filterEngine;
+  }
+
+  private List<String> whitelistedDomains;
+
+  public void setWhitelistedDomains(List<String> domains)
+  {
+    this.whitelistedDomains = domains;
+  }
+
+  public List<String> getWhitelistedDomains()
+  {
+    return whitelistedDomains;
   }
 }

@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>org.adblockplus.libadblockplus.android</groupId>
-    <artifactId>webviewapp</artifactId>
+    <artifactId>settings</artifactId>
     <version>${selfVersion}</version>
-    <packaging>apk</packaging>
-    <name>libadblockplus-android-webviewapp</name>
+    <packaging>aar</packaging>
+    <name>libadblockplus-android-settings</name>
 
     <dependencies>
         <!-- android -->
@@ -30,15 +30,7 @@
         <!-- library -->
         <dependency>
             <groupId>org.adblockplus.libadblockplus.android</groupId>
-            <artifactId>webview</artifactId>
-            <version>${selfVersion}</version>
-            <type>aar</type>
-        </dependency>
-
-        <!-- settings -->
-        <dependency>
-            <groupId>org.adblockplus.libadblockplus.android</groupId>
-            <artifactId>settings</artifactId>
+            <artifactId>library</artifactId>
             <version>${selfVersion}</version>
             <type>aar</type>
         </dependency>
@@ -56,13 +48,16 @@
                 <configuration>
                     <sdk>
                         <platform>21</platform>
-                        <buildTools>${buildTools}</buildTools>
                     </sdk>
+                    <ndk>
+                        <path>${env.ANDROID_NDK_HOME}</path>
+                    </ndk>
 
                     <!-- specific files locations -->
                     <androidManifestFile>AndroidManifest.xml</androidManifestFile>
-                    <nativeLibrariesDirectory>libs</nativeLibrariesDirectory>
                     <resourceDirectory>res</resourceDirectory>
+                    <nativeLibrariesDirectory>libs</nativeLibrariesDirectory>
+                    <assetsDirectory>assets</assetsDirectory>
 
                 </configuration>
                 <extensions>true</extensions>

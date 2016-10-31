@@ -56,8 +56,8 @@ In the root directory run:
 	mvn clean install [-Dandroid.sdk.path=/some/where/sdk]
 
 This will generate *.aar library artifacts in the 'libadblockplus-android/target',
-'libadblockplus-android-webview/target' directories and *.apk in
-'libadblockplus-android-webviewapp/target' directory.
+'libadblockplus-android-settings/target', 'libadblockplus-android-webview/target' directories
+and *.apk in 'libadblockplus-android-webviewapp/target' directory.
 
 Building with Gradle/Android Studio
 -----------------------------------
@@ -140,6 +140,100 @@ This will generate *.apk in 'libadblockplus-android-tests/build/outputs/apk/' di
 
 You can select test class/method and click 'Run ..Test'. The library and test app will be
 compiled, installed to emulator/device and launched automatically.
+
+## Settings
+
+You can find adblock fragments in 'libadblockplus-android-settings' directory:
+* AdblockGeneralSettingsFragment - main fragment
+* AdblockWhitelistedDomainsSettingsFragment - whitelisted domains fragment
+
+### Usage
+
+Create `AdblockEngine` instance with factory methods and `AdblockSettingsStorage` instance.
+You can use `AdblockSettingsSharedPrefsStorage` implementation to store settings in `SharedPreferences`.
+Or you can use Adblock facade:
+
+    Adblock.get().init(this, true, Adblock.PREFERENCE_NAME);
+
+Retain
+
+Implement the following interfaces in your settings activity:
+
+* `AdblockGeneralSettingsFragment.Provider`
+* `AdblockGeneralSettingsFragment.Listener`
+* `AdblockWhitelistedDomainsSettingsFragment.Listener`
+
+and return created instance or Adblock facade instances:
+
+    Adblock.get().getEngine();  // engine
+    Adblock.get().getStorage(); // storage
+
+Retain Adblock facade instance in activity `onCreate`:
+
+    Adblock.get().retain();
+
+and release it in `onDestroy`:
+
+    Adblock.get().release();
+
+Insert `AdblockGeneralSettingsFragment` fragment instance in runtime to start showing settings UI.
+
+### Building
+
+Building with Ant
+-----------------
+
+In the 'libadblockplus-android-settings' directory create the file _local.properties_ and set
+_sdk.dir_ to where you installed it, e.g.:
+
+    sdk.dir = /some/where/sdk
+
+Then run:
+
+    ant debug
+
+
+Building with Gradle
+--------------------
+
+In the project root directory run:
+
+    ./gradlew assemble
+
+This will generate *.aar in 'libadblockplus-android-settings/build/outputs/aar' directory.
+
+## WebView Application
+
+You can find demo application for 'AdblockWebView' class in
+'libadblockplus-android-webviewapp' directory.
+
+### Building
+
+Make sure _Library_ requirements are present.
+
+Building with Ant
+-----------------
+
+In the 'libadblockplus-android-webviewapp' directory create the file _local.properties_ and set
+_sdk.dir_ to where you installed it, e.g.:
+
+    sdk.dir = /some/where/sdk
+
+Then run:
+
+    ant debug
+
+This will generate *.apk in 'libadblockplus-android-webviewapp/bin/' directory.
+
+Building with Gradle
+--------------------
+
+In the project root directory run:
+
+    ./gradlew assemble
+
+This will generate *.apk in 'libadblockplus-android-webviewapp/build/outputs/apk/' directory.
+
 
 ## WebView
 

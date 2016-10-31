@@ -17,10 +17,11 @@
 
 package org.adblockplus.libadblockplus.android.webviewapp;
 
+import org.adblockplus.libadblockplus.android.settings.Adblock;
 import org.adblockplus.libadblockplus.android.webview.AdblockWebView;
-import org.adblockplus.libadblockplus.android.AdblockEngine;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
@@ -29,8 +30,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
@@ -46,10 +45,8 @@ public class MainActivity extends Activity
   private Button ok;
   private Button back;
   private Button forward;
-  private CheckBox abpEnabled;
-  private CheckBox aaEnabled;
+  private Button settings;
 
-  private AdblockEngine adblockEngine;
   private AdblockWebView webView;
 
   @Override
@@ -68,8 +65,7 @@ public class MainActivity extends Activity
     ok = (Button) findViewById(R.id.main_ok);
     back = (Button) findViewById(R.id.main_back);
     forward = (Button) findViewById(R.id.main_forward);
-    abpEnabled = (CheckBox) findViewById(R.id.main_abp_enabled);
-    aaEnabled = (CheckBox) findViewById(R.id.main_aa_enabled);
+    settings = (Button) findViewById(R.id.main_settings);
     progress = (ProgressBar) findViewById(R.id.main_progress);
     webView = (AdblockWebView) findViewById(R.id.main_webview);
   }
@@ -95,12 +91,6 @@ public class MainActivity extends Activity
     {
       setProgressVisible(false);
       updateButtons();
-
-      if (!USE_EXTERNAL_ADBLOCKENGINE)
-      {
-        // as the page is finished internal adblockEngine is created and we can get actual AA value
-        aaEnabled.setChecked(webView.getAdblockEngine().isAcceptableAdsEnabled());
-      }
     }
 
     @Override
@@ -154,9 +144,16 @@ public class MainActivity extends Activity
       }
     });
 
-    initAdblockEngine();
-    initAbp();
-    initAcceptableAds();
+    settings.setOnClickListener(new View.OnClickListener()
+    {
+      @Override
+      public void onClick(View v)
+      {
+        navigateSettings();
+      }
+    });
+
+    initAdblockWebView();
 
     setProgressVisible(false);
     updateButtons();
@@ -174,49 +171,23 @@ public class MainActivity extends Activity
     webView.setWebChromeClient(webChromeClient);
   }
 
-  private void initAdblockEngine()
+  private void navigateSettings()
+  {
+    startActivity(new Intent(this, SettingsActivity.class));
+  }
+
+  private void initAdblockWebView()
   {
     if (USE_EXTERNAL_ADBLOCKENGINE)
     {
-      adblockEngine = AdblockEngine.create(
-        this,
-        AdblockEngine.generateAppInfo(this, true),
-        getCacheDir().getAbsolutePath(),
-        true);
-      webView.setAdblockEngine(adblockEngine); // external (activity-owned) adblockEngine
+      // external adblockEngine
+      Adblock.get().retain();
+      webView.setAdblockEngine(Adblock.get().getEngine());
     }
-  }
-
-  private void initAbp()
-  {
-    abpEnabled.setChecked(webView.isAdblockEnabled());
-    abpEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+    else
     {
-      @Override
-      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-      {
-        webView.setAdblockEnabled(isChecked);
-      }
-    });
-  }
-
-  private void initAcceptableAds()
-  {
-    if (USE_EXTERNAL_ADBLOCKENGINE)
-    {
-      // we can't set this checkbox if not using external engine as internal one is not yet created
-      // (it will be created during the first load)
-      aaEnabled.setChecked(adblockEngine.isAcceptableAdsEnabled());
+      // AdblockWebView will create internal AdblockEngine instance
     }
-    aaEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-    {
-      @Override
-      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-      {
-        // not using this.adblockEngine as it can be internal webView engine
-        webView.getAdblockEngine().setAcceptableAdsEnabled(isChecked);
-      }
-    });
   }
 
   private void hideSoftwareKeyboard()
@@ -268,10 +239,11 @@ public class MainActivity extends Activity
       {
         if (USE_EXTERNAL_ADBLOCKENGINE)
         {
-          adblockEngine.dispose();
+          Adblock.get().release();
         }
       }
     });
+
     super.onDestroy();
   }
 }
