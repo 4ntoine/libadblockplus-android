@@ -103,46 +103,6 @@ public final class AdblockEngine
         .build();
   }
 
-  public static final UpdateAvailableCallback UPDATE_AVAILABLE_CALLBACK =
-    new UpdateAvailableCallback()
-  {
-    @Override
-    public void updateAvailableCallback(String url)
-    {
-      Log.d(TAG, "Update available for " + url);
-    }
-  };
-
-  public static final UpdateCheckDoneCallback UPDATE_CHECK_DONE_CALLBACK =
-    new UpdateCheckDoneCallback()
-  {
-    @Override
-    public void updateCheckDoneCallback(String error)
-    {
-      Log.d(TAG, "Update check done, error: " + error);
-    }
-  };
-
-  public static final ShowNotificationCallback SHOW_NOTIFICATION_CALLBACK =
-    new ShowNotificationCallback()
-  {
-    @Override
-    public void showNotificationCallback(Notification jsValue)
-    {
-      Log.d(TAG, "Notification: " + jsValue);
-    }
-  };
-
-  public static final FilterChangeCallback FILTER_CHANGE_CALLBACK =
-    new FilterChangeCallback()
-  {
-    @Override
-    public void filterChangeCallback(String action, JsValue jsValue)
-    {
-      Log.d(TAG, "Filter changed: " + action + (!jsValue.isUndefined() ? ", " + jsValue : ""));
-    }
-  };
-
   public static AdblockEngine create(final Context context, final AppInfo appInfo,
                                      final String basePath, boolean enableElemhide,
                                      UpdateAvailableCallback updateAvailableCallback,
@@ -193,27 +153,12 @@ public final class AdblockEngine
   public static AdblockEngine create(final Context context, final AppInfo appInfo,
                                      final String basePath, boolean elemhideEnabled)
   {
-    return create(context, appInfo, basePath, elemhideEnabled,
-      UPDATE_AVAILABLE_CALLBACK, UPDATE_CHECK_DONE_CALLBACK,
-      SHOW_NOTIFICATION_CALLBACK, FILTER_CHANGE_CALLBACK);
+    return create(context, appInfo, basePath, elemhideEnabled, null, null, null, null);
   }
 
   public void dispose()
   {
     Log.w(TAG, "Dispose");
-
-    // Safe disposing (just in case)
-    if (this.filterEngine != null)
-    {
-      this.filterEngine.dispose();
-      this.filterEngine = null;
-    }
-
-    if (this.jsEngine != null)
-    {
-      this.jsEngine.dispose();
-      this.jsEngine = null;
-    }
 
     if (this.logSystem != null)
     {
@@ -229,6 +174,11 @@ public final class AdblockEngine
 
     if (this.updateAvailableCallback != null)
     {
+      if (this.filterEngine != null)
+      {
+        this.filterEngine.removeUpdateAvailableCallback();
+      }
+
       this.updateAvailableCallback.dispose();
       this.updateAvailableCallback = null;
     }
@@ -241,14 +191,37 @@ public final class AdblockEngine
 
     if (this.filterChangeCallback != null)
     {
+      if (this.filterEngine != null)
+      {
+        this.filterEngine.removeFilterChangeCallback();
+      }
+
       this.filterChangeCallback.dispose();
       this.filterChangeCallback = null;
     }
 
     if (this.showNotificationCallback != null)
     {
+      if (this.filterEngine != null)
+      {
+        this.filterEngine.removeShowNotificationCallback();
+      }
+
       this.showNotificationCallback.dispose();
       this.showNotificationCallback = null;
+    }
+
+    // Safe disposing (just in case)
+    if (this.filterEngine != null)
+    {
+      this.filterEngine.dispose();
+      this.filterEngine = null;
+    }
+
+    if (this.jsEngine != null)
+    {
+      this.jsEngine.dispose();
+      this.jsEngine = null;
     }
   }
 
