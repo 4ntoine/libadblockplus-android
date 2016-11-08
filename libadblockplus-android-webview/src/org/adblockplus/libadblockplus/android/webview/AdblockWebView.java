@@ -805,7 +805,8 @@ public class AdblockWebView extends WebView
     }
 
     protected WebResourceResponse shouldInterceptRequest(
-      WebView webview, String url, boolean isMainFrame, String[] referrerChainArray)
+      WebView webview, String url, boolean isMainFrame,
+      boolean isXmlHttpRequest, String[] referrerChainArray)
     {
       // if dispose() was invoke, but the page is still loading then just let it go
       if (adblockEngine == null)
@@ -844,29 +845,36 @@ public class AdblockWebView extends WebView
 
       // determine the content
       FilterEngine.ContentType contentType;
-      if (RE_JS.matcher(url).find())
+      if (isXmlHttpRequest)
       {
-        contentType = FilterEngine.ContentType.SCRIPT;
-      }
-      else if (RE_CSS.matcher(url).find())
-      {
-        contentType = FilterEngine.ContentType.STYLESHEET;
-      }
-      else if (RE_IMAGE.matcher(url).find())
-      {
-        contentType = FilterEngine.ContentType.IMAGE;
-      }
-      else if (RE_FONT.matcher(url).find())
-      {
-        contentType = FilterEngine.ContentType.FONT;
-      }
-      else if (RE_HTML.matcher(url).find())
-      {
-        contentType = FilterEngine.ContentType.SUBDOCUMENT;
+        contentType = FilterEngine.ContentType.XMLHTTPREQUEST;
       }
       else
       {
-        contentType = FilterEngine.ContentType.OTHER;
+        if (RE_JS.matcher(url).find())
+        {
+          contentType = FilterEngine.ContentType.SCRIPT;
+        }
+        else if (RE_CSS.matcher(url).find())
+        {
+          contentType = FilterEngine.ContentType.STYLESHEET;
+        }
+        else if (RE_IMAGE.matcher(url).find())
+        {
+          contentType = FilterEngine.ContentType.IMAGE;
+        }
+        else if (RE_FONT.matcher(url).find())
+        {
+          contentType = FilterEngine.ContentType.FONT;
+        }
+        else if (RE_HTML.matcher(url).find())
+        {
+          contentType = FilterEngine.ContentType.SUBDOCUMENT;
+        }
+        else
+        {
+          contentType = FilterEngine.ContentType.OTHER;
+        }
       }
 
       // check if we should block
@@ -905,10 +913,11 @@ public class AdblockWebView extends WebView
       }
 
       // sadly we don't have request headers
-      // (and referrer until android-21 and new callback with request (instead of just url) argument)
+      // (referrer and x-requested until android-21 and new callback with request (instead of just url) argument)
       String[] referrers = null;
+      boolean isXmlHttpRequest = false;
 
-      return shouldInterceptRequest(view, url, isMainFrame, referrers);
+      return shouldInterceptRequest(view, url, isMainFrame, isXmlHttpRequest, referrers);
     }
   }
 
@@ -917,6 +926,11 @@ public class AdblockWebView extends WebView
     d("Clearing referrers");
     url2Referrer.clear();
   }
+
+  protected static final String HEADER_REFERRER = "Referer";
+  protected static final String HEADER_REQUESTED_WITH = "X-Requested-With";
+  protected static final String HEADER_REQUESTED_WITH_XMLHTTPREQUEST = "XMLHttpRequest";
+
 
   /**
    * WebViewClient for API 21 and newer
@@ -931,7 +945,13 @@ public class AdblockWebView extends WebView
       // here we just trying to fill url -> referrer map
       // blocking/allowing loading will happen in `shouldInterceptRequest(WebView,String)`
       String url = request.getUrl().toString();
-      String referrer = request.getRequestHeaders().get("Referer");
+
+      boolean isXmlHttpRequest =
+        request.getRequestHeaders().containsKey(HEADER_REQUESTED_WITH) &&
+        HEADER_REQUESTED_WITH_XMLHTTPREQUEST.equals(
+          request.getRequestHeaders().get(HEADER_REQUESTED_WITH));
+
+      String referrer = request.getRequestHeaders().get(HEADER_REFERRER);
       String[] referrers;
 
       if (referrer != null)
@@ -950,7 +970,7 @@ public class AdblockWebView extends WebView
         referrers = EMPTY_ARRAY;
       }
 
-      return shouldInterceptRequest(view, url, request.isForMainFrame(), referrers);
+      return shouldInterceptRequest(view, url, request.isForMainFrame(), isXmlHttpRequest, referrers);
     }
   }
 
@@ -1191,7 +1211,7 @@ public class AdblockWebView extends WebView
     loadError = null;
     url = newUrl;
 
-    if (url != null)
+    if (url != null && adblockEngine != null)
     {
       try
       {
@@ -1203,7 +1223,8 @@ public class AdblockWebView extends WebView
 
         d("Extracted domain " + domain + " from " + url);
       }
-      catch (Throwable t) {
+      catch (Throwable t)
+      {
         e("Failed to extract domain from " + url, t);
       }
 
@@ -1505,6 +1526,8 @@ public class AdblockWebView extends WebView
   public void dispose(final Runnable disposeFinished)
   {
     d("Dispose invoked");
+
+    stopLoading();
 
     removeJavascriptInterface(BRIDGE);
     adblockEngine = null;
