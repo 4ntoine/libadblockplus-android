@@ -20,11 +20,7 @@ package org.adblockplus.libadblockplus.android.settings;
 import org.adblockplus.libadblockplus.android.Subscription;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Adblock settings

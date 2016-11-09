@@ -19,7 +19,6 @@ package org.adblockplus.libadblockplus.android.settings;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
@@ -210,12 +209,11 @@ public class AdblockGeneralSettingsFragment
 
   private void handleFilterListsChanged(Set<String> newValue)
   {
-    Set<String> selectedValues = newValue;
     List<Subscription> selectedSubscriptions = new LinkedList<Subscription>();
 
     for (Subscription eachSubscription : provider.getAdblockEngine().getRecommendedSubscriptions())
     {
-      if (selectedValues.contains(eachSubscription.url))
+      if (newValue.contains(eachSubscription.url))
       {
         selectedSubscriptions.add(eachSubscription);
       }
@@ -226,7 +224,7 @@ public class AdblockGeneralSettingsFragment
     provider.getAdblockSettingsStorage().save(settings);
 
     // apply settings
-    provider.getAdblockEngine().setSubscriptions(selectedValues);
+    provider.getAdblockEngine().setSubscriptions(newValue);
 
     // since 'aa enabled' setting affects subscriptions list, we need to set it again
     provider.getAdblockEngine().setAcceptableAdsEnabled(settings.isAcceptableAdsEnabled());

@@ -52,8 +52,6 @@ import org.adblockplus.libadblockplus.android.Utils;
 
 import java.io.IOException;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1073,9 +1071,7 @@ public class AdblockWebView extends WebView
   private Object elemHideThreadLockObject = new Object();
   private ElemHideThread elemHideThread;
 
-  private static final String[] EMPTY_ARRAY = new String[]
-    {
-    };
+  private static final String[] EMPTY_ARRAY = {};
 
   private class ElemHideThread extends Thread
   {
@@ -1154,7 +1150,7 @@ public class AdblockWebView extends WebView
       onFinished();
     }
 
-    private Object finishedRunnableLockObject = new Object();
+    private final Object finishedRunnableLockObject = new Object();
     private Runnable finishedRunnable;
 
     public void setFinishedRunnable(Runnable runnable)

@@ -10,9 +10,8 @@
         android:id="@+id/main_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="http://www.google.com"
         android:inputType="textUri"
-        android:singleLine="true"/>
+        android:maxLines="1"/>
 
     <LinearLayout
         android:layout_width="match_parent"

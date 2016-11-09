@@ -182,7 +182,7 @@ public class AdblockWhitelistedDomainsSettingsFragment
       holder.domain.setText(domain);
 
       holder.removeButton.setOnClickListener(removeDomainClickListener);
-      holder.removeButton.setTag(new Integer(position));
+      holder.removeButton.setTag(Integer.valueOf(position));
 
       return convertView;
     }

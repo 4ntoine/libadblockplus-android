@@ -87,15 +87,15 @@ public class Adblock
    */
   public void init(Context context, boolean developmentBuild, String preferenceName)
   {
-    this.context = context;
+    this.context = context.getApplicationContext();
     this.developmentBuild = developmentBuild;
     this.preferenceName = preferenceName;
   }
 
   private void createAdblock()
   {
-    // create engine
     Log.d(TAG, "Creating adblock engine ...");
+
     engine = AdblockEngine.create(
       context,
       AdblockEngine.generateAppInfo(context, developmentBuild),
@@ -125,6 +125,8 @@ public class Adblock
 
   private void disposeAdblock()
   {
+    Log.w(TAG, "Disposing adblock engine");
+
     engine.dispose();
     engine = null;
 
@@ -156,7 +158,6 @@ public class Adblock
   {
     if (referenceCounter.decrementAndGet() == 0)
     {
-      Log.w(TAG, "Disposing adblock engine");
       disposeAdblock();
     }
   }

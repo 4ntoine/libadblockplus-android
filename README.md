@@ -3,8 +3,7 @@ Adblock Plus Library for Android
 
 An Android library project, tests and demo application for AdblockWebView widget.
 
-Updating the dependencies
--------------------------
+## Updating the dependencies
 
 Adblock Plus Library for Android has dependencies that aren't in this repository.
 To update those, call:
@@ -13,16 +12,15 @@ To update those, call:
 
 ## Library
 
-Building with Ant
-------------------
+### Building with Ant
 
-### Requirements
+#### Requirements
 
 * [The Android SDK](http://developer.android.com/sdk)
 * [The Android NDK](https://developer.android.com/tools/sdk/ndk)
 * [Ant](http://ant.apache.org)
 
-### Building
+#### Building
 
 In the 'libadblockplus-android' directory create the file _local.properties_ and set
 _sdk.dir_ and _ndk.dir_ to where you installed it, e.g.:
@@ -34,16 +32,15 @@ Then run:
 
     ant debug
 
-Building with Maven
--------------------
+### Building with Maven
 
-### Requirements
+#### Requirements
 
 All 'Building with Ant' requirements and additional requirements:
 
 * [Maven](https://maven.apache.org)
 
-### Building
+#### Building
 
 Go to android sdk directory '/platforms/android-21' and run:
 
@@ -59,10 +56,9 @@ This will generate *.aar library artifacts in the 'libadblockplus-android/target
 'libadblockplus-android-settings/target', 'libadblockplus-android-webview/target' directories
 and *.apk in 'libadblockplus-android-webviewapp/target' directory.
 
-Building with Gradle/Android Studio
------------------------------------
+### Building with Gradle/Android Studio
 
-### Requirements
+#### Requirements
 
 * [The Android SDK](http://developer.android.com/sdk)
 * Android SDK Build tools 22.0.1
@@ -70,7 +66,7 @@ Building with Gradle/Android Studio
 
 Edit 'buildToolsVersion' in 'build.gradle' files if necessary.
 
-### Building from command-line
+#### Building from command-line
 
 In the project root directory create the file _local.properties_ and set
 _sdk.dir_ and _ndk.dir_ to where you installed it, e.g.:
@@ -155,8 +151,6 @@ Or you can use Adblock facade:
 
     Adblock.get().init(this, true, Adblock.PREFERENCE_NAME);
 
-Retain
-
 Implement the following interfaces in your settings activity:
 
 * `AdblockGeneralSettingsFragment.Provider`
@@ -172,7 +166,7 @@ Retain Adblock facade instance in activity `onCreate`:
 
     Adblock.get().retain();
 
-and release it in `onDestroy`:
+and release it in activity `onDestroy`:
 
     Adblock.get().release();
 
@@ -180,8 +174,7 @@ Insert `AdblockGeneralSettingsFragment` fragment instance in runtime to start sh
 
 ### Building
 
-Building with Ant
------------------
+#### Building with Ant
 
 In the 'libadblockplus-android-settings' directory create the file _local.properties_ and set
 _sdk.dir_ to where you installed it, e.g.:
@@ -193,8 +186,7 @@ Then run:
     ant debug
 
 
-Building with Gradle
---------------------
+#### Building with Gradle
 
 In the project root directory run:
 
@@ -211,8 +203,7 @@ You can find demo application for 'AdblockWebView' class in
 
 Make sure _Library_ requirements are present.
 
-Building with Ant
------------------
+#### Building with Ant
 
 In the 'libadblockplus-android-webviewapp' directory create the file _local.properties_ and set
 _sdk.dir_ to where you installed it, e.g.:
@@ -225,8 +216,7 @@ Then run:
 
 This will generate *.apk in 'libadblockplus-android-webviewapp/bin/' directory.
 
-Building with Gradle
---------------------
+#### Building with Gradle
 
 In the project root directory run:
 
@@ -262,7 +252,7 @@ Use `setDebugMode(boolean debugMode)` to turn debug log output (Android log and 
 
 Use `setAllowDrawDelay(int allowDrawDelay)` to set custom delay to start render webpage after 'DOMContentLoaded' event is fired.
 
-Use `setAdblockEngine(AdblockEngine adblockEngine)` to use external adblock engine
+Use `setAdblockEngine(AdblockEngine adblockEngine)` to use external adblock engine.
 If adblock engine is not set, it's created by AdblockWebView instance automatically.
 
 Use `dispose(Runnable disposeFinished)` to release resources (**required**).
@@ -270,8 +260,7 @@ Note it can be invoked from background thread.
 
 ### Building
 
-Building with Ant
------------------
+#### Building with Ant
 
 In the 'libadblockplus-android-webview' directory create the file _local.properties_ and set
 _sdk.dir_ to where you installed it, e.g.:
@@ -283,8 +272,7 @@ Then run:
     ant debug
 
 
-Building with Gradle
---------------------
+#### Building with Gradle
 
 In the project root directory run:
 
@@ -301,8 +289,7 @@ You can find demo application for 'AdblockWebView' class in
 
 Make sure _Library_ requirements are present.
 
-Building with Ant
------------------
+#### Building with Ant
 
 In the 'libadblockplus-android-webviewapp' directory create the file _local.properties_ and set
 _sdk.dir_ to where you installed it, e.g.:
@@ -315,8 +302,7 @@ Then run:
 
 This will generate *.apk in 'libadblockplus-android-webviewapp/bin/' directory.
 
-Building with Gradle
---------------------
+#### Building with Gradle
 
 In the project root directory run:
 

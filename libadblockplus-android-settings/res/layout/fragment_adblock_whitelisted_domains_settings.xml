@@ -15,7 +15,7 @@
         <!-- Add domain input -->
         <EditText
             android:id="@+id/fragment_adblock_wl_add_label"
-            android:layout_width="1px"
+            android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:lines="1"
