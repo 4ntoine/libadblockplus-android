@@ -61,7 +61,7 @@ and *.apk in the 'libadblockplus-android-webviewapp/target' directory.
 #### Requirements
 
 * [The Android SDK](http://developer.android.com/sdk)
-* Android SDK Build tools 22.0.1
+* Android SDK Build tools 24.0.1
 * [The Android NDK](https://developer.android.com/tools/sdk/ndk)
 
 Edit 'buildToolsVersion' in 'build.gradle' files if necessary.
