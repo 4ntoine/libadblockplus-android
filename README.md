@@ -54,7 +54,7 @@ In the root directory run:
 
 This will generate *.aar library artifacts in the 'libadblockplus-android/target',
 'libadblockplus-android-settings/target', 'libadblockplus-android-webview/target' directories
-and *.apk in 'libadblockplus-android-webviewapp/target' directory.
+and *.apk in the 'libadblockplus-android-webviewapp/target' directory.
 
 ### Building with Gradle/Android Studio
 
@@ -78,7 +78,7 @@ In the project root directory run:
 
     ./gradlew assembleDebug
 
-This will generate *.aar library artifact in 'libadblockplus-android/build/outputs/aar/' directory.
+This will generate *.aar library artifact in the 'libadblockplus-android/build/outputs/aar/' directory.
 
 ## Library tests
 
@@ -90,7 +90,7 @@ Make sure _Library_ requirements are present.
 
 Set ANDROID_HOME environment variable to your Android SDK directory.
 
-In the 'libadblockplus-android-tests' run:
+In the 'libadblockplus-android-tests' directory run:
 
     ant instrument
 
@@ -125,12 +125,12 @@ For example:
 
 ### Building with Gradle/Android Studio
 
-Make sure you've created _local.properties_ file to build the library (see above).
+Make sure you've created the _local.properties_ file to build the library (see above).
 In the project root directory run:
 
     ./gradlew assembleDebugAndroidTest
 
-This will generate *.apk in 'libadblockplus-android-tests/build/outputs/apk/' directory.
+This will generate *.apk in the 'libadblockplus-android-tests/build/outputs/apk/' directory.
 
 ### Testing with Gradle/Android Studio
 
@@ -139,7 +139,7 @@ compiled, installed to emulator/device and launched automatically.
 
 ## Settings
 
-You can find adblock fragments in 'libadblockplus-android-settings' directory:
+You can find adblock fragments in the 'libadblockplus-android-settings' directory:
 * AdblockGeneralSettingsFragment - main fragment
 * AdblockWhitelistedDomainsSettingsFragment - whitelisted domains fragment
 
@@ -162,11 +162,19 @@ and return created instance or Adblock facade instances:
     Adblock.get().getEngine();  // engine
     Adblock.get().getStorage(); // storage
 
-Retain Adblock facade instance in activity `onCreate`:
+Retain Adblock facade instance in activity `onCreate` in synchronous mode (it may take few seconds):
 
-    Adblock.get().retain();
+    Adblock.get().retain(false);
 
-and release it in activity `onDestroy`:
+or in asynchronous mode (without current thread lock):
+
+    Adblock.get().retain(true);
+
+Invoke `waitforReady` every time you need AdblockEngine instance if retained in asynchronous mode:
+
+    Adblock.get().waitForReady();
+
+Release Adblock facade instance in activity `onDestroy`:
 
     Adblock.get().release();
 
@@ -192,7 +200,7 @@ In the project root directory run:
 
     ./gradlew assemble
 
-This will generate *.aar in 'libadblockplus-android-settings/build/outputs/aar' directory.
+This will generate *.aar in the 'libadblockplus-android-settings/build/outputs/aar' directory.
 
 ## WebView Application
 
@@ -214,7 +222,7 @@ Then run:
 
     ant debug
 
-This will generate *.apk in 'libadblockplus-android-webviewapp/bin/' directory.
+This will generate *.apk in the 'libadblockplus-android-webviewapp/bin/' directory.
 
 #### Building with Gradle
 
@@ -222,12 +230,12 @@ In the project root directory run:
 
     ./gradlew assemble
 
-This will generate *.apk in 'libadblockplus-android-webviewapp/build/outputs/apk/' directory.
+This will generate *.apk in the 'libadblockplus-android-webviewapp/build/outputs/apk/' directory.
 
 
 ## WebView
 
-You can find 'AdblockWebView' class in 'libadblockplus-android-webview' directory.
+You can find 'AdblockWebView' class in the 'libadblockplus-android-webview' directory.
 
 `AdblockWebView` class provides built-in ad blocking
 (both resource loading filtering and element hiding) and inherits from Android
@@ -278,11 +286,11 @@ In the project root directory run:
 
     ./gradlew assemble
 
-This will generate *.aar in 'libadblockplus-android-webview/build/outputs/aar' directory.
+This will generate *.aar in the 'libadblockplus-android-webview/build/outputs/aar' directory.
 
 ## WebView Application
 
-You can find demo application for 'AdblockWebView' class in
+You can find demo application for 'AdblockWebView' class in the
 'libadblockplus-android-webviewapp' directory.
 
 ### Building
@@ -300,7 +308,7 @@ Then run:
 
     ant debug
 
-This will generate *.apk in 'libadblockplus-android-webviewapp/bin/' directory.
+This will generate *.apk in the 'libadblockplus-android-webviewapp/bin/' directory.
 
 #### Building with Gradle
 
@@ -308,4 +316,4 @@ In the project root directory run:
 
     ./gradlew assemble
 
-This will generate *.apk in 'libadblockplus-android-webviewapp/build/outputs/apk/' directory.
+This will generate *.apk in the 'libadblockplus-android-webviewapp/build/outputs/apk/' directory.

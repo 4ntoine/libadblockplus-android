@@ -35,10 +35,13 @@ import android.widget.ProgressBar;
 
 public class MainActivity extends Activity
 {
-  private static final boolean DEVELOPMENT_BUILD = true;
+  public static final boolean DEVELOPMENT_BUILD = true;
 
   // webView can create AdblockEngine instance itself if not passed with `webView.setAdblockEngine()`
-  private final boolean USE_EXTERNAL_ADBLOCKENGINE = true;
+  public static final boolean USE_EXTERNAL_ADBLOCKENGINE = true;
+
+  // adblock retain() may be long-running, pass `true` to do it in background thread
+  public static final boolean ADBLOCKENGINE_RETAIN_ASYNC = true;
 
   private ProgressBar progress;
   private EditText url;
@@ -144,14 +147,25 @@ public class MainActivity extends Activity
       }
     });
 
-    settings.setOnClickListener(new View.OnClickListener()
+    if (USE_EXTERNAL_ADBLOCKENGINE)
     {
-      @Override
-      public void onClick(View v)
+      settings.setOnClickListener(new View.OnClickListener()
       {
-        navigateSettings();
-      }
-    });
+        @Override
+        public void onClick(View v)
+        {
+          navigateSettings();
+        }
+      });
+    }
+    else
+    {
+      /*
+      We're able to show settings if we're using Adblock facade only.
+      Otherwise pass AdblockEngine instance to the fragments and not it's neither Serializable nor Parcelable.
+       */
+      settings.setVisibility(View.GONE);
+    }
 
     initAdblockWebView();
 
@@ -181,8 +195,12 @@ public class MainActivity extends Activity
     if (USE_EXTERNAL_ADBLOCKENGINE)
     {
       // external adblockEngine
-      Adblock.get().retain();
-      webView.setAdblockEngine(Adblock.get().getEngine());
+      Adblock.get().retain(ADBLOCKENGINE_RETAIN_ASYNC);
+
+      if (!ADBLOCKENGINE_RETAIN_ASYNC)
+      {
+        webView.setAdblockEngine(Adblock.get().getEngine());
+      }
     }
     else
     {
@@ -226,6 +244,13 @@ public class MainActivity extends Activity
   private void loadUrl()
   {
     hideSoftwareKeyboard();
+
+    // if retained with `true` we need to make sure it's ready now
+    if (USE_EXTERNAL_ADBLOCKENGINE && ADBLOCKENGINE_RETAIN_ASYNC)
+    {
+      Adblock.get().waitForReady();
+      webView.setAdblockEngine(Adblock.get().getEngine());
+    }
     webView.loadUrl(prepareUrl(url.getText().toString()));
   }
 

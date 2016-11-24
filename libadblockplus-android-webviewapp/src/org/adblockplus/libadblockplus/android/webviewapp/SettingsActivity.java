@@ -43,7 +43,7 @@ public class SettingsActivity
   protected void onCreate(Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
-    Adblock.get().retain();
+    Adblock.get().retain(MainActivity.ADBLOCKENGINE_RETAIN_ASYNC);
 
     insertGeneralFragment();
   }
@@ -74,6 +74,8 @@ public class SettingsActivity
   @Override
   public AdblockEngine getAdblockEngine()
   {
+    // if it's retained asynchronously we have to wait until it's ready
+    Adblock.get().waitForReady();
     return Adblock.get().getEngine();
   }
 
@@ -102,6 +104,7 @@ public class SettingsActivity
                                String domain,
                                AdblockSettings settings)
   {
+    // show error here if domain is invalid
     return domain != null && domain.length() > 0;
   }
 

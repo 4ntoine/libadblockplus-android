@@ -24,6 +24,7 @@ import android.util.Log;
 import org.adblockplus.libadblockplus.android.AdblockEngine;
 import org.adblockplus.libadblockplus.android.Utils;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -92,9 +93,18 @@ public class Adblock
     this.preferenceName = preferenceName;
   }
 
+  private CountDownLatch engineCreated;
+
   private void createAdblock()
   {
     Log.d(TAG, "Creating adblock engine ...");
+
+    // read and apply current settings
+    SharedPreferences prefs = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
+    storage = new AdblockSettingsSharedPrefsStorage(prefs);
+
+    // latch is required for async (see `waitForReady()`)
+    engineCreated = new CountDownLatch(1);
 
     engine = AdblockEngine.create(
       context,
@@ -102,10 +112,6 @@ public class Adblock
       context.getCacheDir().getAbsolutePath(),
       true); // `true` as we need element hiding
     Log.d(TAG, "Adblock engine created");
-
-    // read and apply current settings
-    SharedPreferences prefs = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
-    storage = new AdblockSettingsSharedPrefsStorage(prefs);
 
     AdblockSettings settings = storage.load();
     if (settings != null)
@@ -121,6 +127,32 @@ public class Adblock
     {
       Log.w(TAG, "No saved adblock settings");
     }
+
+    // unlock waiting client thread
+    engineCreated.countDown();
+  }
+
+  /**
+   * Wait until everything is ready (used for `retain(true)`)
+   * Warning: locks current thread
+   */
+  public void waitForReady()
+  {
+    if (engineCreated == null)
+    {
+      throw new RuntimeException("Adblock Plus usage exception: call retain(...) first");
+    }
+
+    try
+    {
+      Log.d(TAG, "Waiting for ready ...");
+      engineCreated.await();
+      Log.d(TAG, "Ready");
+    }
+    catch (InterruptedException e)
+    {
+      Log.w(TAG, "Interrupted", e);
+    }
   }
 
   private void disposeAdblock()
@@ -129,6 +161,10 @@ public class Adblock
 
     engine.dispose();
     engine = null;
+
+    // to unlock waiting client in WaitForReady()
+    engineCreated.countDown();
+    engineCreated = null;
 
     storage = null;
   }
@@ -141,13 +177,39 @@ public class Adblock
   private AtomicInteger referenceCounter = new AtomicInteger(0);
 
   /**
-   * Register Adblock engine client
+   * Get registered clients count
+   * @return registered clients count
    */
-  public synchronized void retain()
+  public int getCounter()
+  {
+    return referenceCounter.get();
+  }
+
+  /**
+   * Register Adblock engine client
+   * @param asynchronous If `true` engines will be created in background thread without locking of
+   *                     current thread. Use waitForReady() before getEngine() later.
+   *                     If `false` locks current thread.
+   */
+  public synchronized void retain(boolean asynchronous)
   {
     if (referenceCounter.getAndIncrement() == 0)
     {
-      createAdblock();
+      if (!asynchronous)
+      {
+        createAdblock();
+      }
+      else
+      {
+        new Thread(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            createAdblock();
+          }
+        }).start();
+      }
     }
   }
 
@@ -158,6 +220,7 @@ public class Adblock
   {
     if (referenceCounter.decrementAndGet() == 0)
     {
+      waitForReady();
       disposeAdblock();
     }
   }

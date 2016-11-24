@@ -1485,6 +1485,7 @@ public class AdblockWebView extends WebView
   {
     w("Disposing AdblockEngine");
     adblockEngine.dispose();
+    adblockEngine = null;
 
     disposeEngine = false;
   }
@@ -1526,7 +1527,10 @@ public class AdblockWebView extends WebView
     stopLoading();
 
     removeJavascriptInterface(BRIDGE);
-    adblockEngine = null;
+    if (!disposeEngine)
+    {
+      adblockEngine = null;
+    }
 
     DisposeRunnable disposeRunnable = new DisposeRunnable(disposeFinished);
     synchronized (elemHideThreadLockObject)
