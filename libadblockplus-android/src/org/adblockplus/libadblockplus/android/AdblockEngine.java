@@ -31,9 +31,7 @@ import org.adblockplus.libadblockplus.FilterChangeCallback;
 import org.adblockplus.libadblockplus.FilterEngine;
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.adblockplus.libadblockplus.JsEngine;
-import org.adblockplus.libadblockplus.JsValue;
 import org.adblockplus.libadblockplus.LogSystem;
-import org.adblockplus.libadblockplus.Notification;
 import org.adblockplus.libadblockplus.ShowNotificationCallback;
 import org.adblockplus.libadblockplus.Subscription;
 import org.adblockplus.libadblockplus.UpdateAvailableCallback;
@@ -48,8 +46,6 @@ import android.util.Log;
 public final class AdblockEngine
 {
   private static final String TAG = Utils.getTag(AdblockEngine.class);
-
-  private final Context context;
 
   /*
    * The fields below are volatile because:
@@ -72,9 +68,8 @@ public final class AdblockEngine
   private volatile ShowNotificationCallback showNotificationCallback;
   private final boolean elemhideEnabled;
 
-  private AdblockEngine(final Context context, final boolean enableElemhide)
+  private AdblockEngine(final boolean enableElemhide)
   {
-    this.context = context;
     this.elemhideEnabled = enableElemhide;
   }
 
@@ -103,7 +98,7 @@ public final class AdblockEngine
         .build();
   }
 
-  public static AdblockEngine create(final Context context, final AppInfo appInfo,
+  public static AdblockEngine create(final AppInfo appInfo,
                                      final String basePath, boolean enableElemhide,
                                      UpdateAvailableCallback updateAvailableCallback,
                                      UpdateCheckDoneCallback updateCheckDoneCallback,
@@ -112,7 +107,7 @@ public final class AdblockEngine
   {
     Log.w(TAG, "Create");
 
-    final AdblockEngine engine = new AdblockEngine(context, enableElemhide);
+    final AdblockEngine engine = new AdblockEngine(enableElemhide);
 
     engine.jsEngine = new JsEngine(appInfo);
     engine.jsEngine.setDefaultFileSystem(basePath);
@@ -150,10 +145,10 @@ public final class AdblockEngine
     return engine;
   }
 
-  public static AdblockEngine create(final Context context, final AppInfo appInfo,
+  public static AdblockEngine create(final AppInfo appInfo,
                                      final String basePath, boolean elemhideEnabled)
   {
-    return create(context, appInfo, basePath, elemhideEnabled, null, null, null, null);
+    return create(appInfo, basePath, elemhideEnabled, null, null, null, null);
   }
 
   public void dispose()

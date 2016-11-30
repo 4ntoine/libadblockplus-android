@@ -107,7 +107,6 @@ public class Adblock
     engineCreated = new CountDownLatch(1);
 
     engine = AdblockEngine.create(
-      context,
       AdblockEngine.generateAppInfo(context, developmentBuild),
       context.getCacheDir().getAbsolutePath(),
       true); // `true` as we need element hiding

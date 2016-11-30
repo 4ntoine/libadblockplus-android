@@ -21,20 +21,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
-import org.adblockplus.libadblockplus.JsValue;
-import org.adblockplus.libadblockplus.Subscription;
-import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 
 public final class Utils
 {

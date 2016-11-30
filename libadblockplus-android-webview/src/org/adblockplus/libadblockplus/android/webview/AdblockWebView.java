@@ -1057,7 +1057,6 @@ public class AdblockWebView extends WebView
 
     // assuming `this.debugMode` can be used as `developmentBuild` value
     adblockEngine = AdblockEngine.create(
-      this.getContext(),
       AdblockEngine.generateAppInfo(this.getContext(), debugMode),
       this.getContext().getCacheDir().getAbsolutePath(),
       true);
@@ -1068,7 +1067,7 @@ public class AdblockWebView extends WebView
   private String injectJs;
   private CountDownLatch elemHideLatch;
   private String elemHideSelectorsString;
-  private Object elemHideThreadLockObject = new Object();
+  private final Object elemHideThreadLockObject = new Object();
   private ElemHideThread elemHideThread;
 
   private static final String[] EMPTY_ARRAY = {};
