@@ -45,6 +45,11 @@ public class AdblockGeneralSettingsFragment
   private String SETTINGS_AA_ENABLED_KEY;
   private String SETTINGS_WL_DOMAINS_KEY;
 
+  private SwitchPreference adblockEnabled;
+  private MultiSelectListPreference filterLists;
+  private SwitchPreference acceptableAdsEnabled;
+  private Preference whitelistedDomains;
+
   /**
    * Listener with additional `onWhitelistedDomainsClicked` event
    */
@@ -99,11 +104,6 @@ public class AdblockGeneralSettingsFragment
     SETTINGS_AA_ENABLED_KEY = getString(R.string.fragment_adblock_settings_aa_enabled_key);
     SETTINGS_WL_DOMAINS_KEY = getString(R.string.fragment_adblock_settings_wl_key);
   }
-
-  private SwitchPreference adblockEnabled;
-  private MultiSelectListPreference filterLists;
-  private SwitchPreference acceptableAdsEnabled;
-  private Preference whitelistedDomains;
 
   private void bindPreferences()
   {

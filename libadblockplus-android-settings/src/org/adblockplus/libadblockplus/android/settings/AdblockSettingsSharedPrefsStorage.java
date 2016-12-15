@@ -39,13 +39,12 @@ public class AdblockSettingsSharedPrefsStorage extends AdblockSettingsStorage
   private static final String SETTINGS_WL_DOMAIN_KEY = "domain";
 
   private SharedPreferences prefs;
+  private boolean commit = true;
 
   public AdblockSettingsSharedPrefsStorage(SharedPreferences prefs)
   {
     this.prefs = prefs;
   }
-
-  private boolean commit = true;
 
   public boolean isCommit()
   {

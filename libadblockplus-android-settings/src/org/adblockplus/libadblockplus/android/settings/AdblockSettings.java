@@ -28,6 +28,9 @@ import java.util.List;
 public class AdblockSettings implements Serializable
 {
   private transient boolean adblockEnabled;
+  private transient Boolean acceptableAdsEnabled;
+  private List<Subscription> subscriptions;
+  private List<String> whitelistedDomains;
 
   public boolean isAdblockEnabled()
   {
@@ -39,8 +42,6 @@ public class AdblockSettings implements Serializable
     this.adblockEnabled = adblockEnabled;
   }
 
-  private transient Boolean acceptableAdsEnabled;
-
   public boolean isAcceptableAdsEnabled()
   {
     return acceptableAdsEnabled;
@@ -51,8 +52,6 @@ public class AdblockSettings implements Serializable
     this.acceptableAdsEnabled = acceptableAdsEnabled;
   }
 
-  private List<Subscription> subscriptions;
-
   public List<Subscription> getSubscriptions()
   {
     return subscriptions;
@@ -62,8 +61,6 @@ public class AdblockSettings implements Serializable
   {
     this.subscriptions = subscriptions;
   }
-
-  private List<String> whitelistedDomains;
 
   public List<String> getWhitelistedDomains()
   {

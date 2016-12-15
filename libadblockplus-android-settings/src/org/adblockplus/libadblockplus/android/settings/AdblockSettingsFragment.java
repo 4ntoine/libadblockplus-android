@@ -30,6 +30,9 @@ public abstract class AdblockSettingsFragment
   extends PreferenceFragment
 {
   protected final String TAG = Utils.getTag(this.getClass());
+  protected AdblockSettings settings;
+  protected Provider provider;
+  protected ListenerClass listener;
 
   /**
    * Provides AdblockEngine and SharedPreferences to store settings
@@ -54,9 +57,6 @@ public abstract class AdblockSettingsFragment
      */
     void onAdblockSettingsChanged(AdblockSettingsFragment fragment);
   }
-
-  protected Provider provider;
-  protected ListenerClass listener;
 
   protected <T> T castOrThrow(Activity activity, Class<T> clazz)
   {
@@ -106,8 +106,6 @@ public abstract class AdblockSettingsFragment
     super.onResume();
     loadSettings();
   }
-
-  protected AdblockSettings settings;
 
   public AdblockSettings getSettings()
   {

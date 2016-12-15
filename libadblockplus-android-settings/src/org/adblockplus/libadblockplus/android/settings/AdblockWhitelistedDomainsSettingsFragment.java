@@ -44,6 +44,11 @@ public class AdblockWhitelistedDomainsSettingsFragment
 {
   private static final String TAG = Utils.getTag(AdblockWhitelistedDomainsSettingsFragment.class);
 
+  private EditText domain;
+  private ImageView addDomainButton;
+  private ListView listView;
+  private Adapter adapter;
+
   /**
    * Listener with additional `isValidDomain` method
    */
@@ -74,11 +79,6 @@ public class AdblockWhitelistedDomainsSettingsFragment
     super.onAttach(activity);
     listener = castOrThrow(activity, Listener.class);
   }
-
-  private EditText domain;
-  private ImageView addDomainButton;
-  private ListView listView;
-  private Adapter adapter;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)

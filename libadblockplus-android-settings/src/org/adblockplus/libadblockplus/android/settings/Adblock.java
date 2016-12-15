@@ -39,14 +39,27 @@ public class Adblock
    * Suggested preference name
    */
   public static final String PREFERENCE_NAME = "ADBLOCK";
+  private static Adblock _instance;
+
+  private Context context;
+  private boolean developmentBuild;
+  private String preferenceName;
+  private AdblockEngine engine;
+  private AdblockSettingsStorage storage;
+  private CountDownLatch engineCreated;
+
+  /*
+    Simple ARC management for AdblockEngine
+    Use `retain` and `release`
+   */
+
+  private AtomicInteger referenceCounter = new AtomicInteger(0);
 
   // singleton
   protected Adblock()
   {
     // prevents instantiation
   }
-
-  private static Adblock _instance;
 
   /**
    * Use to get Adblock instance
@@ -62,18 +75,10 @@ public class Adblock
     return _instance;
   }
 
-  private Context context;
-  private boolean developmentBuild;
-  private String preferenceName;
-
-  private AdblockEngine engine;
-
   public AdblockEngine getEngine()
   {
     return engine;
   }
-
-  private AdblockSettingsStorage storage;
 
   public AdblockSettingsStorage getStorage()
   {
@@ -92,8 +97,6 @@ public class Adblock
     this.developmentBuild = developmentBuild;
     this.preferenceName = preferenceName;
   }
-
-  private CountDownLatch engineCreated;
 
   private void createAdblock()
   {
@@ -167,13 +170,6 @@ public class Adblock
 
     storage = null;
   }
-
-  /*
-    Simple ARC management for AdblockEngine
-    Use `retain` and `release`
-   */
-
-  private AtomicInteger referenceCounter = new AtomicInteger(0);
 
   /**
    * Get registered clients count
