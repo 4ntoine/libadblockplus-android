@@ -1,0 +1,48 @@
+apply plugin: 'com.android.application'
+
+allprojects {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+android {
+  compileSdkVersion 16
+  buildToolsVersion "24.0.1"
+
+  defaultConfig {
+    applicationId "org.adblockplus.libadblockplus.tests"
+    minSdkVersion 9
+    targetSdkVersion 16
+    versionCode 1
+    versionName "1.0"
+  }
+
+  sourceSets {
+    main {
+      manifest.srcFile 'AndroidManifest.xml'
+    }
+
+    androidTest {
+      manifest.srcFile 'AndroidManifest.xml'
+      java.srcDirs = ['src']
+
+      jni {
+        dependencies {
+          project ":libadblockplus-android"
+        }
+      }
+    }
+  }
+}
+
+dependencies {
+  androidTestCompile project(':libadblockplus-android')
+  androidTestCompile fileTree(include: ['*.jar'], dir: 'libs')
+}
