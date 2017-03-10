@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import org.adblockplus.libadblockplus.IsAllowedConnectionCallback;
+import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
 import org.adblockplus.libadblockplus.android.AdblockEngine;
 import org.adblockplus.libadblockplus.android.Utils;
 
@@ -47,6 +49,9 @@ public class AdblockHelper
   private AdblockEngine engine;
   private AdblockSettingsStorage storage;
   private CountDownLatch engineCreated;
+
+  private IsAllowedConnectionCallback isAllowedConnectionCallback;
+  private UpdateCheckDoneCallback updateCheckDoneCallback;
 
   /*
     Simple ARC management for AdblockEngine
@@ -100,6 +105,16 @@ public class AdblockHelper
 
   private void createAdblock()
   {
+    this.isAllowedConnectionCallback = new IsAllowedConnectionCallbackImpl(context);
+    this.updateCheckDoneCallback = new UpdateCheckDoneCallback()
+    {
+      @Override
+      public void updateCheckDoneCallback(String error)
+      {
+        // nothing
+      }
+    };
+
     Log.d(TAG, "Creating adblock engine ...");
 
     // read and apply current settings
@@ -112,8 +127,16 @@ public class AdblockHelper
     engine = AdblockEngine.create(
       AdblockEngine.generateAppInfo(context, developmentBuild),
       context.getCacheDir().getAbsolutePath(),
-      true); // `true` as we need element hiding
-    Log.d(TAG, "AdblockHelper engine created");
+      true,
+      isAllowedConnectionCallback,
+      null,
+      updateCheckDoneCallback,
+      null,
+      null); // `true` as we need element hiding
+    Log.d(TAG, "Adblock engine created");
+
+    engine.getFilterEngine().setAllowedConnectionType("new_type");
+    String ct = engine.getFilterEngine().getAllowedConnectionType();
 
     AdblockSettings settings = storage.load();
     if (settings != null)
@@ -121,9 +144,15 @@ public class AdblockHelper
       Log.d(TAG, "Applying saved adblock settings to adblock engine");
       // apply last saved settings to adblock engine
 
-      // all the settings except `enabled` and whitelisted domains are saved by adblock engine itself
+      // all the settings except `enabled`, whitelisted domains list
+      // and allowed connection type are saved by adblock engine itself
       engine.setEnabled(settings.isAdblockEnabled());
       engine.setWhitelistedDomains(settings.getWhitelistedDomains());
+
+      String connectionType = (settings.getAllowedConnectionType() != null
+       ? settings.getAllowedConnectionType().getValue()
+       : null);
+      engine.getFilterEngine().setAllowedConnectionType(connectionType);
     }
     else
     {
@@ -169,6 +198,13 @@ public class AdblockHelper
     engineCreated = null;
 
     storage = null;
+
+    // callbacks
+    this.isAllowedConnectionCallback.dispose();
+    this.isAllowedConnectionCallback = null;
+
+    this.updateCheckDoneCallback.dispose();
+    this.updateCheckDoneCallback = null;
   }
 
   /**

@@ -19,6 +19,9 @@
 #include "Utils.h"
 #include "JniCallbacks.h"
 
+#include <android/log.h>
+#define APPNAME "libadblockplus_ndk"
+
 static jobject SubscriptionsToArrayList(JNIEnv* env, std::vector<AdblockPlus::SubscriptionPtr>& subscriptions)
 {
   jobject list = NewJniArrayList(env);
@@ -44,12 +47,35 @@ static AdblockPlus::FilterEngine::ContentType ConvertContentType(JNIEnv *env,
   return AdblockPlus::FilterEngine::StringToContentType(value);
 }
 
-static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong enginePtr)
+static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong jsEnginePtr, jlong isAllowedConnectionCallbackPtr)
 {
   try
   {
-    AdblockPlus::JsEnginePtr& jsEngine = *JniLongToTypePtr<AdblockPlus::JsEnginePtr>(enginePtr);
-    return JniPtrToLong(new AdblockPlus::FilterEngine(jsEngine));
+    AdblockPlus::JsEnginePtr& jsEngine = *JniLongToTypePtr<AdblockPlus::JsEnginePtr>(jsEnginePtr);
+    AdblockPlus::FilterEnginePtr filterEnginePtr = NULL;
+
+    if (isAllowedConnectionCallbackPtr != 0)
+    {
+      AdblockPlus::FilterEngine::CreateParameters createParameters;
+      JniIsAllowedConnectionTypeCallback* callback =
+        JniLongToTypePtr<JniIsAllowedConnectionTypeCallback>(isAllowedConnectionCallbackPtr);
+
+      AdblockPlus::FilterEngine::IsConnectionAllowedCallback cppCallback =
+        std::bind(&JniIsAllowedConnectionTypeCallback::Callback, callback, std::placeholders::_1);
+      createParameters.isConnectionAllowed = cppCallback;
+
+      __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Creating filter engine with createParams ...");
+      filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine, createParameters); // here (1) - create engine sync
+    }
+    else
+    {
+      __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Creating filter engine ...");
+      filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine);
+    }
+
+     __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Filter engine created ... %p", filterEnginePtr.get());
+
+    return JniPtrToLong(filterEnginePtr.get());
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -434,9 +460,44 @@ static jstring JNICALL JniGetHostFromURL(JNIEnv* env, jclass clazz, jlong ptr, j
   CATCH_THROW_AND_RETURN(env, 0)
 }
 
+static void JNICALL JniSetAllowedConnectionType(JNIEnv* env, jclass clazz, jlong ptr, jstring jvalue)
+{
+  AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
+
+  const std::string* value = NULL;
+  if (jvalue != NULL)
+  {
+    std::string stdValue = JniJavaToStdString(env, jvalue);
+    value = &stdValue;
+  }
+
+  try
+  {
+    engine->SetAllowedConnectionType(value);
+  }
+  CATCH_AND_THROW(env)
+}
+
+static jstring JNICALL JniGetAllowedConnectionType(JNIEnv* env, jclass clazz, jlong ptr)
+{
+  try
+  {
+    AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
+    std::unique_ptr<std::string> value = engine->GetAllowedConnectionType();
+
+    if (value == NULL)
+    {
+      return NULL;
+    }
+
+    return JniStdStringToJava(env, *value.get());
+  }
+  CATCH_THROW_AND_RETURN(env, 0)
+}
+
 static JNINativeMethod methods[] =
 {
-  { (char*)"ctor", (char*)"(J)J", (void*)JniCtor },
+  { (char*)"ctor", (char*)"(JJ)J", (void*)JniCtor },
   { (char*)"isFirstRun", (char*)"(J)Z", (void*)JniIsFirstRun },
   { (char*)"getFilter", (char*)"(JLjava/lang/String;)" TYP("Filter"), (void*)JniGetFilter },
   { (char*)"getListedFilters", (char*)"(J)Ljava/util/List;", (void*)JniGetListedFilters },
@@ -459,6 +520,8 @@ static JNINativeMethod methods[] =
   { (char*)"getPref", (char*)"(JLjava/lang/String;)" TYP("JsValue"), (void*)JniGetPref },
   { (char*)"setPref", (char*)"(JLjava/lang/String;J)V", (void*)JniSetPref },
   { (char*)"getHostFromURL", (char*)"(JLjava/lang/String;)Ljava/lang/String;", (void*)JniGetHostFromURL },
+  { (char*)"setAllowedConnectionType", (char*)"(JLjava/lang/String;)V", (void*)JniSetAllowedConnectionType },
+  { (char*)"getAllowedConnectionType", (char*)"(J)Ljava/lang/String;", (void*)JniGetAllowedConnectionType },
   { (char*)"dtor", (char*)"(J)V", (void*)JniDtor }
 };
 

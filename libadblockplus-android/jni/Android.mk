@@ -31,11 +31,14 @@ LOCAL_SRC_FILES += JniLogSystem.cpp JniWebRequest.cpp
 LOCAL_SRC_FILES += JniUpdateAvailableCallback.cpp JniUpdateCheckDoneCallback.cpp
 LOCAL_SRC_FILES += JniFilterChangeCallback.cpp JniCallbacks.cpp Utils.cpp
 LOCAL_SRC_FILES += JniNotification.cpp JniShowNotificationCallback.cpp
+LOCAL_SRC_FILES += JniIsAllowedConnectionTypeCallback.cpp
 
 LOCAL_CPP_FEATURES := exceptions 
 LOCAL_CPPFLAGS += -std=c++11
 
 LOCAL_C_INCLUDES := jni/libadblockplus-binaries/include/
 LOCAL_STATIC_LIBRARIES := libadblockplus v8-base v8-snapshot
+
+LOCAL_LDLIBS := -llog
 
 include $(BUILD_SHARED_LIBRARY)
