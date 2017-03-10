@@ -39,6 +39,4 @@ LOCAL_CPPFLAGS += -std=c++11
 LOCAL_C_INCLUDES := jni/libadblockplus-binaries/include/
 LOCAL_STATIC_LIBRARIES := libadblockplus v8-base v8-snapshot
 
-LOCAL_LDLIBS := -llog
-
 include $(BUILD_SHARED_LIBRARY)

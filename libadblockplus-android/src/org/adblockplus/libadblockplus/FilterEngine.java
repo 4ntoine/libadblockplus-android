@@ -39,7 +39,9 @@ public final class FilterEngine implements Disposable
   public FilterEngine(final JsEngine jsEngine, final IsAllowedConnectionCallback isAllowedConnectionCallback)
   {
     long jisAllowedConnectionCallbackPtr =
-      (isAllowedConnectionCallback != null ? isAllowedConnectionCallback.ptr : 0l);
+      (isAllowedConnectionCallback != null
+        ? isAllowedConnectionCallback.ptr
+        : 0l);
     this.ptr = ctor(jsEngine.ptr, jisAllowedConnectionCallbackPtr);
     this.disposer = new Disposer(this, new DisposeWrapper(this.ptr));
   }

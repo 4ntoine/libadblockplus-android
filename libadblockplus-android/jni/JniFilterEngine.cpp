@@ -19,9 +19,6 @@
 #include "Utils.h"
 #include "JniCallbacks.h"
 
-#include <android/log.h>
-#define APPNAME "libadblockplus_ndk"
-
 static jobject SubscriptionsToArrayList(JNIEnv* env, std::vector<AdblockPlus::SubscriptionPtr>& subscriptions)
 {
   jobject list = NewJniArrayList(env);
@@ -64,16 +61,12 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong jsEnginePtr, jlong
         std::bind(&JniIsAllowedConnectionTypeCallback::Callback, callback, std::placeholders::_1);
       createParameters.isConnectionAllowed = cppCallback;
 
-      __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Creating filter engine with createParams ...");
-      filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine, createParameters); // here (1) - create engine sync
+      filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine, createParameters);
     }
     else
     {
-      __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Creating filter engine ...");
       filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine);
     }
-
-     __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Filter engine created ... %p", filterEnginePtr.get());
 
     return JniPtrToLong(filterEnginePtr.get());
   }
@@ -464,7 +457,7 @@ static void JNICALL JniSetAllowedConnectionType(JNIEnv* env, jclass clazz, jlong
 {
   AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
 
-  const std::string* value = NULL;
+  std::string* value = NULL;
   if (jvalue != NULL)
   {
     std::string stdValue = JniJavaToStdString(env, jvalue);
@@ -477,6 +470,7 @@ static void JNICALL JniSetAllowedConnectionType(JNIEnv* env, jclass clazz, jlong
   }
   CATCH_AND_THROW(env)
 }
+
 
 static jstring JNICALL JniGetAllowedConnectionType(JNIEnv* env, jclass clazz, jlong ptr)
 {

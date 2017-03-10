@@ -18,9 +18,6 @@
 #include "JniCallbacks.h"
 #include "Utils.h"
 
-#include <android/log.h>
-#define APPNAME "libadblockplus_ndk"
-
 static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jobject callbackObject)
 {
   try
@@ -28,8 +25,7 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jobject callbackObject)
     JniIsAllowedConnectionTypeCallback* callback =
       new JniIsAllowedConnectionTypeCallback(env, callbackObject);
 
-    jlong longPtr = JniPtrToLong(callback);
-    return longPtr;
+    return JniPtrToLong(callback);
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -49,12 +45,10 @@ bool JniIsAllowedConnectionTypeCallback::Callback(const std::string* allowedConn
 {
   JNIEnvAcquire env(GetJavaVM());
 
-  __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "IsAllowedConnection callback ...");
-
   jmethodID method = env->GetMethodID(
-      *JniLocalReference<jclass>(*env,
-          env->GetObjectClass(GetCallbackObject())),
-      "isConnectionAllowed", "(Ljava/lang/String;)Z");
+      *JniLocalReference<jclass>(*env, env->GetObjectClass(GetCallbackObject())),
+      "isConnectionAllowed",
+      "(Ljava/lang/String;)Z");
 
   jstring jAllowedConnectionType =
     (allowedConnectionType != NULL

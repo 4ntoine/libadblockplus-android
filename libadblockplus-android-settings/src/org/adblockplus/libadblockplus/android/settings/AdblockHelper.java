@@ -51,7 +51,6 @@ public class AdblockHelper
   private CountDownLatch engineCreated;
 
   private IsAllowedConnectionCallback isAllowedConnectionCallback;
-  private UpdateCheckDoneCallback updateCheckDoneCallback;
 
   /*
     Simple ARC management for AdblockEngine
@@ -106,14 +105,6 @@ public class AdblockHelper
   private void createAdblock()
   {
     this.isAllowedConnectionCallback = new IsAllowedConnectionCallbackImpl(context);
-    this.updateCheckDoneCallback = new UpdateCheckDoneCallback()
-    {
-      @Override
-      public void updateCheckDoneCallback(String error)
-      {
-        // nothing
-      }
-    };
 
     Log.d(TAG, "Creating adblock engine ...");
 
@@ -130,7 +121,7 @@ public class AdblockHelper
       true,
       isAllowedConnectionCallback,
       null,
-      updateCheckDoneCallback,
+      null,
       null,
       null); // `true` as we need element hiding
     Log.d(TAG, "Adblock engine created");
@@ -202,9 +193,6 @@ public class AdblockHelper
     // callbacks
     this.isAllowedConnectionCallback.dispose();
     this.isAllowedConnectionCallback = null;
-
-    this.updateCheckDoneCallback.dispose();
-    this.updateCheckDoneCallback = null;
   }
 
   /**
