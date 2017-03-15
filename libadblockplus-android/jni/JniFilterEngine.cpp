@@ -459,12 +459,10 @@ static void JNICALL JniSetAllowedConnectionType(JNIEnv* env, jclass clazz, jlong
 {
   AdblockPlus::FilterEnginePtr* engine = JniLongToTypePtr<AdblockPlus::FilterEnginePtr>(ptr);
 
-  const std::string* value = NULL;
-  if (jvalue != NULL)
-  {
-    std::string stdValue = JniJavaToStdString(env, jvalue);
-    value = &stdValue;
-  }
+  std::string stdValue;
+  const std::string* value = (jvalue != NULL
+    ? &(stdValue = JniJavaToStdString(env, jvalue))
+    : NULL);
 
   try
   {
