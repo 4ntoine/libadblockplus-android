@@ -135,9 +135,6 @@ public class AdblockHelper
       null); // `true` as we need element hiding
     Log.d(TAG, "Adblock engine created");
 
-    engine.getFilterEngine().setAllowedConnectionType("new_type");
-    String ct = engine.getFilterEngine().getAllowedConnectionType();
-
     AdblockSettings settings = storage.load();
     if (settings != null)
     {
@@ -193,7 +190,7 @@ public class AdblockHelper
     engine.dispose();
     engine = null;
 
-    // to unlock waiting client in WaitForReady()
+    // to unlock waiting client in waitForReady()
     engineCreated.countDown();
     engineCreated = null;
 
