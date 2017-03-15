@@ -52,7 +52,7 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong jsEnginePtr, jlong
   try
   {
     AdblockPlus::JsEnginePtr& jsEngine = *JniLongToTypePtr<AdblockPlus::JsEnginePtr>(jsEnginePtr);
-    AdblockPlus::FilterEnginePtr filterEnginePtr = NULL;
+    AdblockPlus::FilterEnginePtr filterEngine;
 
     if (isAllowedConnectionCallbackPtr != 0)
     {
@@ -65,17 +65,17 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong jsEnginePtr, jlong
       createParameters.isConnectionAllowed = cppCallback;
 
       __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Creating filter engine with createParams ...");
-      filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine, createParameters); // here (1) - create engine sync
+      filterEngine = AdblockPlus::FilterEngine::Create(jsEngine, createParameters); // here (1) - create engine sync
     }
     else
     {
       __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Creating filter engine ...");
-      filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine);
+      filterEngine = AdblockPlus::FilterEngine::Create(jsEngine);
     }
 
-     __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Filter engine created ... %p", filterEnginePtr.get());
+     __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Filter engine created ... %p", filterEngine.get());
 
-    return JniPtrToLong(filterEnginePtr.get());
+    return JniPtrToLong(filterEngine.get());
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
