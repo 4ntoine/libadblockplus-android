@@ -49,7 +49,7 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong jsEnginePtr, jlong
   try
   {
     AdblockPlus::JsEnginePtr& jsEngine = *JniLongToTypePtr<AdblockPlus::JsEnginePtr>(jsEnginePtr);
-    AdblockPlus::FilterEnginePtr filterEnginePtr = NULL;
+    AdblockPlus::FilterEnginePtr filterEngine;
 
     if (isAllowedConnectionCallbackPtr != 0)
     {
@@ -61,14 +61,14 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong jsEnginePtr, jlong
         std::bind(&JniIsAllowedConnectionTypeCallback::Callback, callback, std::placeholders::_1);
       createParameters.isConnectionAllowed = cppCallback;
 
-      filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine, createParameters);
+      filterEngine = AdblockPlus::FilterEngine::Create(jsEngine, createParameters);
     }
     else
     {
-      filterEnginePtr = AdblockPlus::FilterEngine::Create(jsEngine);
+      filterEngine = AdblockPlus::FilterEngine::Create(jsEngine);
     }
 
-    return JniPtrToLong(filterEnginePtr.get());
+    return JniPtrToLong(filterEngine.get());
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -470,7 +470,6 @@ static void JNICALL JniSetAllowedConnectionType(JNIEnv* env, jclass clazz, jlong
   }
   CATCH_AND_THROW(env)
 }
-
 
 static jstring JNICALL JniGetAllowedConnectionType(JNIEnv* env, jclass clazz, jlong ptr)
 {
