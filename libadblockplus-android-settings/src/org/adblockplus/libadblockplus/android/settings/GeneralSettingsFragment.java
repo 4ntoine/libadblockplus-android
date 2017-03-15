@@ -218,7 +218,7 @@ public class GeneralSettingsFragment
     }
     else if (preference.getKey().equals(SETTINGS_ALLOWED_CONNECTION_TYPE_KEY))
     {
-      handleUpdatesConnectionTypeChanged((String) newValue);
+      handleAllowedConnectionTypeChanged((String) newValue);
     }
     else
     {
@@ -231,7 +231,7 @@ public class GeneralSettingsFragment
     return true;
   }
 
-  private void handleUpdatesConnectionTypeChanged(String value)
+  private void handleAllowedConnectionTypeChanged(String value)
   {
     // update and save settings
     settings.setAllowedConnectionType(ConnectionType.findByValue(value));
