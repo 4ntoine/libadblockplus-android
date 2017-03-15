@@ -19,9 +19,6 @@
 #include "Utils.h"
 #include "JniCallbacks.h"
 
-#include <android/log.h>
-#define APPNAME "libadblockplus_ndk"
-
 static jobject SubscriptionsToArrayList(JNIEnv* env, std::vector<AdblockPlus::SubscriptionPtr>& subscriptions)
 {
   jobject list = NewJniArrayList(env);
@@ -64,23 +61,14 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong jsEnginePtr, jlong
         std::bind(&JniIsAllowedConnectionTypeCallback::Callback, callback, std::placeholders::_1);
       createParameters.isConnectionAllowed = cppCallback;
 
-      __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Creating filter engine with createParams ...");
       filterEngine = new AdblockPlus::FilterEnginePtr(
         AdblockPlus::FilterEngine::Create(jsEngine, createParameters));
     }
     else
     {
-      __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Creating filter engine ...");
       filterEngine = new AdblockPlus::FilterEnginePtr(
         AdblockPlus::FilterEngine::Create(jsEngine));
     }
-
-    int ref_count = filterEngine->use_count();
-    __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Filter engine created ... %p with %d references",
-      filterEngine, filterEngine->use_count());
-
-    int ref_counter = filterEngine->get()->GetJsEngine().use_count();
-    __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "js ref counter = %d", ref_counter);
 
     return JniPtrToLong(filterEngine);
   }
@@ -422,14 +410,8 @@ static jboolean JNICALL JniIsElemhideWhitelisted(JNIEnv* env, jclass clazz, jlon
 static jobject JNICALL JniGetPref(JNIEnv* env, jclass clazz, jlong ptr, jstring jPref)
 {
   AdblockPlus::FilterEnginePtr* engine = JniLongToTypePtr<AdblockPlus::FilterEnginePtr>(ptr);
-  __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "filter engine ref counter = %d", engine->use_count());
-
-  int ref_counter = engine->get()->GetJsEngine().use_count();
-  __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "js ref counter = %d", ref_counter);
 
   std::string pref = JniJavaToStdString(env, jPref);
-
-  __android_log_print(ANDROID_LOG_DEBUG, APPNAME, "Getting %s pref from filter engine %p", pref.c_str(), engine);
 
   try
   {
