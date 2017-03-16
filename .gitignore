@@ -1,5 +1,3 @@
-syntax: glob
-
 crowdin.yaml
 **/libs/armeabi*
 **/libs/x86
