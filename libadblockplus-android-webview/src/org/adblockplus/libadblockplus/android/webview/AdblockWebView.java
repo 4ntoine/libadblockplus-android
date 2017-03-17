@@ -954,10 +954,11 @@ public class AdblockWebView extends WebView
     w("Creating AdblockEngine");
 
     // assuming `this.debugMode` can be used as `developmentBuild` value
-    adblockEngine = AdblockEngine.create(
-      AdblockEngine.generateAppInfo(this.getContext(), debugMode),
-      this.getContext().getCacheDir().getAbsolutePath(),
-      true);
+    adblockEngine = new AdblockEngine.Builder(
+        AdblockEngine.generateAppInfo(this.getContext(), debugMode),
+        this.getContext().getCacheDir().getAbsolutePath())
+      .enableElementHiding(true)
+      .build();
   }
 
   private class ElemHideThread extends Thread

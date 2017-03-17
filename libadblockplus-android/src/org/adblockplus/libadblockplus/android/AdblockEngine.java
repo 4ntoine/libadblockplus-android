@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.adblockplus.libadblockplus.AppInfo;
@@ -36,6 +37,7 @@ import org.adblockplus.libadblockplus.ShowNotificationCallback;
 import org.adblockplus.libadblockplus.Subscription;
 import org.adblockplus.libadblockplus.UpdateAvailableCallback;
 import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
+import org.adblockplus.libadblockplus.WebRequest;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -61,19 +63,14 @@ public final class AdblockEngine
   private volatile JsEngine jsEngine;
   private volatile FilterEngine filterEngine;
   private volatile LogSystem logSystem;
-  private volatile AndroidWebRequest webRequest;
+  private volatile WebRequest webRequest;
   private volatile UpdateAvailableCallback updateAvailableCallback;
   private volatile UpdateCheckDoneCallback updateCheckDoneCallback;
   private volatile FilterChangeCallback filterChangeCallback;
   private volatile ShowNotificationCallback showNotificationCallback;
-  private final boolean elemhideEnabled;
+  private volatile boolean elemhideEnabled;
   private volatile boolean enabled = true;
-  private List<String> whitelistedDomains;
-
-  private AdblockEngine(final boolean enableElemhide)
-  {
-    this.elemhideEnabled = enableElemhide;
-  }
+  private volatile List<String> whitelistedDomains;
 
   public static AppInfo generateAppInfo(final Context context, boolean developmentBuild)
   {
@@ -100,57 +97,116 @@ public final class AdblockEngine
         .build();
   }
 
-  public static AdblockEngine create(final AppInfo appInfo,
-                                     final String basePath, boolean enableElemhide,
-                                     UpdateAvailableCallback updateAvailableCallback,
-                                     UpdateCheckDoneCallback updateCheckDoneCallback,
-                                     ShowNotificationCallback showNotificationCallback,
-                                     FilterChangeCallback filterChangeCallback)
+  /**
+   * Builds Adblock engine
+   */
+  public static class Builder
   {
-    Log.w(TAG, "Create");
+    // temp settings
+    private Context context;
+    private volatile Map<String, Integer> URLtoResourceIdMap;
+    private volatile AndroidWebRequestResourceWrapper.Storage resourceStorage;
 
-    final AdblockEngine engine = new AdblockEngine(enableElemhide);
+    // product
+    private AndroidWebRequest androidWebRequest;
+    private AdblockEngine engine;
 
-    engine.jsEngine = new JsEngine(appInfo);
-    engine.jsEngine.setDefaultFileSystem(basePath);
-
-    engine.logSystem = new AndroidLogSystem();
-    engine.jsEngine.setLogSystem(engine.logSystem);
-
-    engine.webRequest = new AndroidWebRequest(enableElemhide);
-    engine.jsEngine.setWebRequest(engine.webRequest);
-
-    engine.filterEngine = new FilterEngine(engine.jsEngine);
-
-    engine.updateAvailableCallback = updateAvailableCallback;
-    if (engine.updateAvailableCallback != null)
+    public Builder(final AppInfo appInfo, final String basePath)
     {
-      engine.filterEngine.setUpdateAvailableCallback(updateAvailableCallback);
+      engine = new AdblockEngine();
+
+      engine.jsEngine = new JsEngine(appInfo);
+      engine.jsEngine.setDefaultFileSystem(basePath);
+
+      engine.logSystem = new AndroidLogSystem();
+      engine.jsEngine.setLogSystem(engine.logSystem);
+
+      engine.elemhideEnabled = true;
     }
 
-    engine.updateCheckDoneCallback = updateCheckDoneCallback;
-
-    engine.showNotificationCallback = showNotificationCallback;
-    if (engine.showNotificationCallback != null)
+    public Builder enableElementHiding(boolean enable)
     {
-      engine.filterEngine.setShowNotificationCallback(showNotificationCallback);
+      engine.elemhideEnabled = enable;
+      return this;
     }
 
-    engine.filterChangeCallback = filterChangeCallback;
-    if (engine.filterChangeCallback != null)
+    public Builder preloadSubscriptions(Context context,
+                                        Map<String, Integer> URLtoResourceIdMap,
+                                        AndroidWebRequestResourceWrapper.Storage storage)
     {
-      engine.filterEngine.setFilterChangeCallback(filterChangeCallback);
+      this.context = context;
+      this.URLtoResourceIdMap = URLtoResourceIdMap;
+      this.resourceStorage = storage;
+      return this;
     }
 
-    engine.webRequest.updateSubscriptionURLs(engine.filterEngine);
+    public Builder setUpdateAvailableCallback(UpdateAvailableCallback callback)
+    {
+      engine.updateAvailableCallback = callback;
+      return this;
+    }
 
-    return engine;
-  }
+    public Builder setUpdateCheckDoneCallback(UpdateCheckDoneCallback callback)
+    {
+      engine.updateCheckDoneCallback = callback;
+      return this;
+    }
 
-  public static AdblockEngine create(final AppInfo appInfo,
-                                     final String basePath, boolean elemhideEnabled)
-  {
-    return create(appInfo, basePath, elemhideEnabled, null, null, null, null);
+    public Builder setShowNotificationCallback(ShowNotificationCallback callback)
+    {
+      engine.showNotificationCallback = callback;
+      return this;
+    }
+
+    public Builder setFilterChangeCallback(FilterChangeCallback callback)
+    {
+      engine.filterChangeCallback = callback;
+      return this;
+    }
+
+    private void initRequests()
+    {
+      androidWebRequest = new AndroidWebRequest(engine.elemhideEnabled);
+      engine.webRequest = androidWebRequest;
+
+      if (URLtoResourceIdMap != null)
+      {
+        engine.webRequest = new AndroidWebRequestResourceWrapper(
+          context, engine.webRequest, URLtoResourceIdMap, resourceStorage);
+      }
+
+      engine.jsEngine.setWebRequest(engine.webRequest);
+    }
+
+    private void initCallbacks()
+    {
+      if (engine.updateAvailableCallback != null)
+      {
+        engine.filterEngine.setUpdateAvailableCallback(engine.updateAvailableCallback);
+      }
+
+      if (engine.showNotificationCallback != null)
+      {
+        engine.filterEngine.setShowNotificationCallback(engine.showNotificationCallback);
+      }
+
+      if (engine.filterChangeCallback != null)
+      {
+        engine.filterEngine.setFilterChangeCallback(engine.filterChangeCallback);
+      }
+    }
+
+    public AdblockEngine build()
+    {
+      initRequests();
+
+      engine.filterEngine = new FilterEngine(engine.jsEngine);
+      initCallbacks();
+
+      androidWebRequest.updateSubscriptionURLs(engine.filterEngine);
+
+      return engine;
+    }
   }
 
   public void dispose()

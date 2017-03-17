@@ -17,7 +17,11 @@
 
 package org.adblockplus.libadblockplus.android.webviewapp;
 
+import org.adblockplus.libadblockplus.android.AndroidWebRequestResourceWrapper;
 import org.adblockplus.libadblockplus.android.settings.AdblockHelper;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Application extends android.app.Application
 {
@@ -27,6 +31,13 @@ public class Application extends android.app.Application
     super.onCreate();
 
     // init Adblock
-    AdblockHelper.get().init(this, true, AdblockHelper.PREFERENCE_NAME);
+    Map<String, Integer> map = new HashMap<>();
+    map.put(AndroidWebRequestResourceWrapper.EASYLIST_CHINESE, R.raw.easylist_min);
+    map.put(AndroidWebRequestResourceWrapper.ACCEPTABLE_ADS, R.raw.keypartner_whitelist);
+
+    AdblockHelper
+      .get()
+      .init(this, true, AdblockHelper.PREFERENCE_NAME)
+      .preloadSubscriptions(AdblockHelper.PRELOADED_PREFERENCE_NAME, map);
   }
 }
