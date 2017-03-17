@@ -51,8 +51,8 @@ public class AndroidWebRequest extends WebRequest
   /**
    * Ctor
    * @param enableElemhide Enable element hiding?
-   *                       Element hiding required significantly more memory
-   *                       but allows to apply element hiding for better ad blocking
+   *                       Element hiding requires significantly more memory
+   *                       but allows better ad blocking
    * @param compressedStream Request for gzip compressed stream from the server
    */
   public AndroidWebRequest(boolean enableElemhide, boolean compressedStream)
