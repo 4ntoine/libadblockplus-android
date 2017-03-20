@@ -66,6 +66,9 @@ public class AdblockWebView extends WebView
 {
   private static final String TAG = Utils.getTag(AdblockWebView.class);
 
+  // basePath to store subscription files
+  public static final String BASE_PATH_DIRECTORY = "adblock";
+
   /**
    * Default (in some conditions) start redraw delay after DOM modified with injected JS (millis)
    */
@@ -954,9 +957,10 @@ public class AdblockWebView extends WebView
     w("Creating AdblockEngine");
 
     // assuming `this.debugMode` can be used as `developmentBuild` value
-    adblockEngine = new AdblockEngine.Builder(
+    adblockEngine = AdblockEngine
+      .builder(
         AdblockEngine.generateAppInfo(this.getContext(), debugMode),
-        this.getContext().getCacheDir().getAbsolutePath())
+        this.getContext().getDir(BASE_PATH_DIRECTORY, Context.MODE_PRIVATE).getAbsolutePath())
       .enableElementHiding(true)
       .build();
   }

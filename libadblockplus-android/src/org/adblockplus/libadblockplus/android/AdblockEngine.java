@@ -43,6 +43,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build.VERSION;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 public final class AdblockEngine
@@ -102,26 +104,24 @@ public final class AdblockEngine
    */
   public static class Builder
   {
-    // temp settings
     private Context context;
-    private volatile Map<String, Integer> URLtoResourceIdMap;
-    private volatile AndroidWebRequestResourceWrapper.Storage resourceStorage;
-
-    // product
+    private Map<String, Integer> URLtoResourceIdMap;
+    private AndroidWebRequestResourceWrapper.Storage resourceStorage;
     private AndroidWebRequest androidWebRequest;
+    private AppInfo appInfo;
+    private String basePath;
+
     private AdblockEngine engine;
 
-    public Builder(final AppInfo appInfo, final String basePath)
+    protected Builder(final AppInfo appInfo, final String basePath)
     {
       engine = new AdblockEngine();
-
-      engine.jsEngine = new JsEngine(appInfo);
-      engine.jsEngine.setDefaultFileSystem(basePath);
-
-      engine.logSystem = new AndroidLogSystem();
-      engine.jsEngine.setLogSystem(engine.logSystem);
-
       engine.elemhideEnabled = true;
+
+      // we can't create JsEngine and FilterEngine right now as it starts to download subscriptions
+      // and requests (AndroidWebRequest and probbaly wrappers) are not specified yet
+      this.appInfo = appInfo;
+      this.basePath = basePath;
     }
 
     public Builder enableElementHiding(boolean enable)
@@ -171,11 +171,12 @@ public final class AdblockEngine
 
       if (URLtoResourceIdMap != null)
       {
-        engine.webRequest = new AndroidWebRequestResourceWrapper(
+        AndroidWebRequestResourceWrapper wrapper = new AndroidWebRequestResourceWrapper(
           context, engine.webRequest, URLtoResourceIdMap, resourceStorage);
-      }
+        wrapper.setListener(engine.resourceWrapperListener);
 
-      engine.jsEngine.setWebRequest(engine.webRequest);
+        engine.webRequest = wrapper;
+      }
     }
 
     private void initCallbacks()
@@ -200,14 +201,68 @@ public final class AdblockEngine
     {
       initRequests();
 
-      engine.filterEngine = new FilterEngine(engine.jsEngine);
+      // webRequest should be ready to be used passed right after JsEngine is created
+      createEngines();
+
       initCallbacks();
 
       androidWebRequest.updateSubscriptionURLs(engine.filterEngine);
 
       return engine;
     }
+
+    private void createEngines()
+    {
+      engine.jsEngine = new JsEngine(appInfo);
+      engine.jsEngine.setDefaultFileSystem(basePath);
+
+      engine.jsEngine.setWebRequest(engine.webRequest);
+
+      engine.logSystem = new AndroidLogSystem();
+      engine.jsEngine.setLogSystem(engine.logSystem);
+
+      engine.filterEngine = new FilterEngine(engine.jsEngine);
+    }
   }
+
+  public static Builder builder(AppInfo appInfo, String basePath)
+  {
+    return new Builder(appInfo, basePath);
+  }
+
+  private AndroidWebRequestResourceWrapper.Listener resourceWrapperListener =
+    new AndroidWebRequestResourceWrapper.Listener()
+  {
+    private static final int UPDATE_DELAY_MS = 1 * 1000;
+
+    private Handler handler = new Handler(Looper.getMainLooper());
+
+    private Runnable forceUpdateRunnable = new Runnable()
+    {
+      public void run() {
+        // Filter Engine can be already disposed
+        if (filterEngine != null)
+        {
+          Log.d(TAG, "Force update subscriptions");
+          filterEngine.forceUpdateCheck(updateCheckDoneCallback);
+        }
+      }
+    };
+
+    @Override
+    public void onIntercepted(String url, int resourceId)
+    {
+      // we need to force update subscriptions ASAP after preloaded one is returned
+      // but we should note that multiple interceptions (for main easylist and AA) and force update once only
+
+      // adding into main thread queue to avoid concurrency issues (start update while updating)
+      // as usually onIntercepted() is invoked in background thread
+      handler.removeCallbacks(forceUpdateRunnable);
+      handler.postDelayed(forceUpdateRunnable, UPDATE_DELAY_MS);
+
+      Log.d(TAG, "Scheduled force update in " + UPDATE_DELAY_MS);
+    }
+  };
 
   public void dispose()
   {

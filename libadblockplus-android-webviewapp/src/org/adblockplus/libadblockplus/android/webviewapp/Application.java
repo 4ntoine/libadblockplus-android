@@ -31,13 +31,16 @@ public class Application extends android.app.Application
     super.onCreate();
 
     // init Adblock
-    Map<String, Integer> map = new HashMap<>();
+
+    // provide preloaded subscriptions
+    Map<String, Integer> map = new HashMap<String, Integer>();
+    map.put(AndroidWebRequestResourceWrapper.EASYLIST, R.raw.easylist_min);
     map.put(AndroidWebRequestResourceWrapper.EASYLIST_CHINESE, R.raw.easylist_min);
     map.put(AndroidWebRequestResourceWrapper.ACCEPTABLE_ADS, R.raw.keypartner_whitelist);
 
     AdblockHelper
       .get()
       .init(this, true, AdblockHelper.PREFERENCE_NAME)
-      .preloadSubscriptions(AdblockHelper.PRELOADED_PREFERENCE_NAME, map);
+      .preloadSubscriptions(AdblockHelper.PRELOAD_PREFERENCE_NAME, map);
   }
 }

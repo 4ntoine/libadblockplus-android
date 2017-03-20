@@ -38,6 +38,9 @@ public class AdblockHelper
 {
   private static final String TAG = Utils.getTag(AdblockHelper.class);
 
+  // basePath to store subscription files
+  public static final String BASE_PATH_DIRECTORY = "adblock";
+
   /**
    * Suggested preference name to store settings
    */
@@ -46,7 +49,7 @@ public class AdblockHelper
   /**
    * Suggested preference name to store intercepted subscription requests
    */
-  public static final String PRELOADED_PREFERENCE_NAME = "ADBLOCK_PRELOADED";
+  public static final String PRELOAD_PREFERENCE_NAME = "ADBLOCK_PRELOAD";
   private static AdblockHelper _instance;
 
   private Context context;
@@ -130,12 +133,14 @@ public class AdblockHelper
       Context.MODE_PRIVATE);
     storage = new SharedPrefsStorage(settingsPrefs);
 
-    File basePath = context.getDir("adblockplus", Context.MODE_PRIVATE);
-    AdblockEngine.Builder builder = new AdblockEngine.Builder(
+    File basePath = context.getDir(BASE_PATH_DIRECTORY, Context.MODE_PRIVATE);
+    AdblockEngine.Builder builder = AdblockEngine
+      .builder(
         AdblockEngine.generateAppInfo(context, developmentBuild),
         basePath.getAbsolutePath())
       .enableElementHiding(true);
 
+    // if preloaded subscriptions provided
     if (preloadedPreferenceName != null)
     {
       SharedPreferences preloadedSubscriptionsPrefs = context.getSharedPreferences(

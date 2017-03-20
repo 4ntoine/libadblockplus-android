@@ -78,17 +78,14 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
   private WebRequest request;
   private Map<String, Integer> URLtoResouceIdMap;
   private Storage storage;
-
-  public Map<String, Integer> getURLtoResouceIdMap()
-  {
-    return URLtoResouceIdMap;
-  }
+  private Listener listener;
 
   /**
    * Constructor
    * @param context android context
    * @param request wrapped request to perform the request if it's not preloaded subscription requested
    * @param URLtoResourceIdMap map URL -> android resource id for preloaded subscriptions
+   *                           See AndroidWebRequestResourceWrapper.EASYLIST_... constants
    * @param storage Storage impl to remember served interceptions
    */
   public AndroidWebRequestResourceWrapper(Context context, WebRequest request,
@@ -101,9 +98,20 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
     this.storage = storage;
   }
 
+  public Listener getListener()
+  {
+    return listener;
+  }
+
+  public void setListener(Listener listener)
+  {
+    this.listener = listener;
+  }
+
   @Override
   public ServerResponse httpGET(String url, List<HeaderEntry> headers)
   {
+    // since parameters may vary we need to ignore them
     String urlWithoutParams = url.substring(0, url.indexOf("?"));
     Integer resourceId = URLtoResouceIdMap.get(urlWithoutParams);
 
@@ -112,8 +120,14 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
       if (!storage.contains(urlWithoutParams))
       {
         Log.w(TAG, "Intercepting request for " + url + " with resource #" + resourceId.intValue());
-        ServerResponse response = buildFileContentResponse(resourceId);
+        ServerResponse response = buildResourceContentResponse(resourceId);
         storage.put(urlWithoutParams);
+
+        if (listener != null)
+        {
+          listener.onIntercepted(url, resourceId);
+        }
+
         return response;
       }
       else
@@ -128,10 +142,9 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
 
   protected String readResourceContent(int resourceId) throws IOException
   {
-    Log.d(TAG, "Reading from resource ..");
+    Log.d(TAG, "Reading from resource ...");
 
     InputStream is = null;
-    String content = null;
 
     try
     {
@@ -153,8 +166,8 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
         sb.append(line);
       }
 
-      Log.d(TAG, "Resource read, " + sb.length() + " bytes");
-      content = sb.toString();
+      Log.d(TAG, "Resource read (" + sb.length() + " bytes)");
+      return sb.toString();
     }
     finally
     {
@@ -163,11 +176,9 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
         is.close();
       }
     }
-
-    return content;
   }
 
-  protected ServerResponse buildFileContentResponse(int resourceId)
+  protected ServerResponse buildResourceContentResponse(int resourceId)
   {
     ServerResponse response = new ServerResponse();
     try
@@ -178,12 +189,26 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
     }
     catch (IOException e)
     {
-      // failed to read file contents
       Log.e(TAG, "Error injecting response", e);
       response.setStatus(ServerResponse.NsStatus.ERROR_FAILURE);
     }
 
     return response;
+  }
+
+  @Override
+  public void dispose()
+  {
+    request.dispose();
+    super.dispose();
+  }
+
+  /**
+   * Listener for events
+   */
+  public interface Listener
+  {
+    void onIntercepted(String url, int resourceId);
   }
 
   /**
@@ -193,13 +218,6 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
   {
     void put(String url);
     boolean contains(String url);
-  }
-
-  @Override
-  public void dispose()
-  {
-    request.dispose();
-    super.dispose();
   }
 
   /**
@@ -221,7 +239,7 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
     @Override
     public synchronized void put(String url)
     {
-      this.urls.add(url);
+      urls.add(url);
 
       prefs
         .edit()
