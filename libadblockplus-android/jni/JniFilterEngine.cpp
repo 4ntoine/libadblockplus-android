@@ -53,16 +53,16 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong jsEnginePtr, jlong
 
     if (isAllowedConnectionCallbackPtr != 0)
     {
-      AdblockPlus::FilterEngine::CreateParameters createParameters;
+      AdblockPlus::FilterEngine::CreationParameters creationParameters;
       JniIsAllowedConnectionTypeCallback* callback =
         JniLongToTypePtr<JniIsAllowedConnectionTypeCallback>(isAllowedConnectionCallbackPtr);
 
       AdblockPlus::FilterEngine::IsConnectionAllowedCallback cppCallback =
         std::bind(&JniIsAllowedConnectionTypeCallback::Callback, callback, std::placeholders::_1);
-      createParameters.isConnectionAllowed = cppCallback;
+      creationParameters.isConnectionAllowedCallback = cppCallback;
 
       filterEngine = new AdblockPlus::FilterEnginePtr(
-        AdblockPlus::FilterEngine::Create(jsEngine, createParameters));
+        AdblockPlus::FilterEngine::Create(jsEngine, creationParameters));
     }
     else
     {
