@@ -118,12 +118,8 @@ public class AdblockHelper
     engine = AdblockEngine.create(
       AdblockEngine.generateAppInfo(context, developmentBuild),
       context.getCacheDir().getAbsolutePath(),
-      true,
-      isAllowedConnectionCallback,
-      null,
-      null,
-      null,
-      null); // `true` as we need element hiding
+      true, // `true` as we need element hiding
+      isAllowedConnectionCallback);
     Log.d(TAG, "Adblock engine created");
 
     AdblockSettings settings = storage.load();
