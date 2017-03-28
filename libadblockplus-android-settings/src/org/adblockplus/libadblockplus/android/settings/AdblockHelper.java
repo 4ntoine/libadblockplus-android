@@ -38,9 +38,6 @@ public class AdblockHelper
 {
   private static final String TAG = Utils.getTag(AdblockHelper.class);
 
-  // basePath to store subscription files
-  public static final String BASE_PATH_DIRECTORY = "adblock";
-
   /**
    * Suggested preference name to store settings
    */
@@ -56,7 +53,7 @@ public class AdblockHelper
   private boolean developmentBuild;
   private String settingsPreferenceName;
   private String preloadedPreferenceName;
-  private Map<String, Integer> URLtoResourceIdMap;
+  private Map<String, Integer> urlToResourceIdMap;
   private AdblockEngine engine;
   private AdblockSettingsStorage storage;
   private CountDownLatch engineCreated;
@@ -115,12 +112,12 @@ public class AdblockHelper
   /**
    * Use preloaded subscriptions
    * @param preferenceName Shared Preferences name to store intercepted requests stats
-   * @param URLtoResourceIdMap
+   * @param urlToResourceIdMap
    */
-  public void preloadSubscriptions(String preferenceName, Map<String, Integer> URLtoResourceIdMap)
+  public void preloadSubscriptions(String preferenceName, Map<String, Integer> urlToResourceIdMap)
   {
     this.preloadedPreferenceName = preferenceName;
-    this.URLtoResourceIdMap = URLtoResourceIdMap;
+    this.urlToResourceIdMap = urlToResourceIdMap;
   }
 
   private void createAdblock()
@@ -133,7 +130,7 @@ public class AdblockHelper
       Context.MODE_PRIVATE);
     storage = new SharedPrefsStorage(settingsPrefs);
 
-    File basePath = context.getDir(BASE_PATH_DIRECTORY, Context.MODE_PRIVATE);
+    File basePath = context.getDir(AdblockEngine.BASE_PATH_DIRECTORY, Context.MODE_PRIVATE);
     AdblockEngine.Builder builder = AdblockEngine
       .builder(
         AdblockEngine.generateAppInfo(context, developmentBuild),
@@ -148,7 +145,7 @@ public class AdblockHelper
         Context.MODE_PRIVATE);
       builder.preloadSubscriptions(
         context,
-        URLtoResourceIdMap,
+        urlToResourceIdMap,
         new AndroidWebRequestResourceWrapper.SharedPrefsStorage(preloadedSubscriptionsPrefs));
     }
 

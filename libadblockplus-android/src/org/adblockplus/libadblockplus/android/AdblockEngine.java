@@ -49,6 +49,9 @@ import android.util.Log;
 
 public final class AdblockEngine
 {
+  // default base path to store subscription files in android app
+  public static final String BASE_PATH_DIRECTORY = "adblock";
+
   private static final String TAG = Utils.getTag(AdblockEngine.class);
 
   /*
