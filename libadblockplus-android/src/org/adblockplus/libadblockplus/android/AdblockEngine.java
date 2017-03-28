@@ -157,27 +157,22 @@ public final class AdblockEngine
   {
     Log.w(TAG, "Dispose");
 
+    // engines first
     if (this.filterEngine != null)
     {
       if (this.updateAvailableCallback != null)
       {
         this.filterEngine.removeUpdateAvailableCallback();
-        this.updateAvailableCallback.dispose();
-        this.updateAvailableCallback = null;
       }
 
       if (this.filterChangeCallback != null)
       {
         this.filterEngine.removeFilterChangeCallback();
-        this.filterChangeCallback.dispose();
-        this.filterChangeCallback = null;
       }
 
       if (this.showNotificationCallback != null)
       {
         this.filterEngine.removeShowNotificationCallback();
-        this.showNotificationCallback.dispose();
-        this.showNotificationCallback = null;
       }
 
       this.filterEngine.dispose();
@@ -188,6 +183,25 @@ public final class AdblockEngine
     {
       this.jsEngine.dispose();
       this.jsEngine = null;
+    }
+
+    // callbacks then
+    if (this.updateAvailableCallback != null)
+    {
+      this.updateAvailableCallback.dispose();
+      this.updateAvailableCallback = null;
+    }
+
+    if (this.filterChangeCallback != null)
+    {
+      this.filterChangeCallback.dispose();
+      this.filterChangeCallback = null;
+    }
+
+    if (this.showNotificationCallback != null)
+    {
+      this.showNotificationCallback.dispose();
+      this.showNotificationCallback = null;
     }
 
     if (this.logSystem != null)
