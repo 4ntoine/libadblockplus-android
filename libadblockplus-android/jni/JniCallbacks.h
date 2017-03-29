@@ -84,6 +84,11 @@ public:
   void operator()(AdblockPlus::LogSystem::LogLevel logLevel, const std::string& message, const std::string& source);
 };
 
+/**
+ * Shared smart pointer to a `JniLogSystemCallback` instance.
+ */
+typedef std::shared_ptr<JniLogSystemCallback> JniLogSystemCallbackPtr;
+
 class JniShowNotificationCallback : public JniCallbackBase
 {
 public:
