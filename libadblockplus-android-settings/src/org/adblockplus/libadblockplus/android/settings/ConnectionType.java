@@ -22,65 +22,50 @@ import android.net.ConnectivityManager;
 public enum ConnectionType {
 
   // All WiFi networks
-  WIFI(
-    "wifi",
-    new ConnectionChecker()
+  WIFI("wifi")
+  {
+    @Override
+    public boolean isRequiredConnection(ConnectivityManager manager)
     {
-      @Override
-      public boolean isRequiredConnection(ConnectivityManager manager)
-      {
-        return manager.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI;
-      }
-    }),
+      return manager.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI;
+    }
+  },
 
   // Non-metered WiFi networks
-  WIFI_NON_METERED(
-    "wifi_non_metered",
-    new ConnectionChecker()
+  WIFI_NON_METERED("wifi_non_metered")
+  {
+    @Override
+    public boolean isRequiredConnection(ConnectivityManager manager)
     {
-      @Override
-      public boolean isRequiredConnection(ConnectivityManager manager)
-      {
-        return
-          manager.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI &&
-          !manager.isActiveNetworkMetered();
+      return
+        manager.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI &&
+        !manager.isActiveNetworkMetered();
     }
-  }),
+  },
 
   // Any connection
-  ANY(
-    "any",
-    new ConnectionChecker()
+  ANY("any")
+  {
+    @Override
+    public boolean isRequiredConnection(ConnectivityManager manager)
     {
-      @Override
-      public boolean isRequiredConnection(ConnectivityManager manager)
-      {
-        return true;
-      }
-    });
+      return true;
+    }
+  };
 
   private String value;
-  private ConnectionChecker checker;
 
   public String getValue()
   {
     return value;
   }
 
-  public ConnectionChecker getChecker()
-  {
-    return checker;
-  }
+  // check if current device connection type is equal to this concrete connection type
+  public abstract boolean isRequiredConnection(ConnectivityManager manager);
 
-  ConnectionType(String value, ConnectionChecker checker)
+  ConnectionType(String value)
   {
     this.value = value;
-    this.checker = checker;
-  }
-
-  interface ConnectionChecker
-  {
-    boolean isRequiredConnection(ConnectivityManager manager);
   }
 
   public static ConnectionType findByValue(String value)

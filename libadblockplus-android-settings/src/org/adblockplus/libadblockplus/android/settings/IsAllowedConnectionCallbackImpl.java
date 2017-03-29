@@ -62,9 +62,9 @@ public class IsAllowedConnectionCallbackImpl extends IsAllowedConnectionCallback
       return false;
     }
 
-    if (!connectionType.getChecker().isRequiredConnection(manager))
+    if (!connectionType.isRequiredConnection(manager))
     {
-      Log.w(TAG, "Current connection type is not allowed for subscription updates");
+      Log.w(TAG, "Current connection type is not allowed for web requests");
       return false;
     }
 
