@@ -233,14 +233,14 @@ public final class AdblockEngine
     return new Builder(appInfo, basePath);
   }
 
-  private AndroidWebRequestResourceWrapper.Listener resourceWrapperListener =
+  private final AndroidWebRequestResourceWrapper.Listener resourceWrapperListener =
     new AndroidWebRequestResourceWrapper.Listener()
   {
     private static final int UPDATE_DELAY_MS = 1 * 1000;
 
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
-    private Runnable forceUpdateRunnable = new Runnable()
+    private final Runnable forceUpdateRunnable = new Runnable()
     {
       public void run() {
         // Filter Engine can be already disposed
