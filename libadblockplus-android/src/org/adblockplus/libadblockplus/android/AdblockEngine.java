@@ -256,7 +256,18 @@ public final class AdblockEngine
         if (filterEngine != null)
         {
           Log.d(TAG, "Force update subscriptions");
-          filterEngine.forceUpdateCheck(updateCheckDoneCallback);
+          List<Subscription> subscriptions = filterEngine.getListedSubscriptions();
+          for (Subscription eachSubscription : subscriptions)
+          {
+            try
+            {
+              eachSubscription.updateFilters();
+            }
+            finally
+            {
+              eachSubscription.dispose();
+            }
+          }
         }
       }
     };
