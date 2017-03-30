@@ -99,7 +99,7 @@ public class AdblockHelper
    * Init with context
    * @param context application context
    * @param developmentBuild debug or release?
-   * @param preferenceName Shared Preferences name to store adlock settings
+   * @param preferenceName Shared Preferences name to store adblock settings
    */
   public AdblockHelper init(Context context, boolean developmentBuild, String preferenceName)
   {
