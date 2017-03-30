@@ -76,7 +76,7 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
 
   private Context context;
   private WebRequest request;
-  private Map<String, Integer> URLtoResouceIdMap;
+  private Map<String, Integer> urlToResourceIdMap;
   private Storage storage;
   private Listener listener;
 
@@ -84,17 +84,17 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
    * Constructor
    * @param context android context
    * @param request wrapped request to perform the request if it's not preloaded subscription requested
-   * @param URLtoResourceIdMap map URL -> android resource id for preloaded subscriptions
+   * @param urlToResourceIdMap map URL -> android resource id for preloaded subscriptions
    *                           See AndroidWebRequestResourceWrapper.EASYLIST_... constants
    * @param storage Storage impl to remember served interceptions
    */
   public AndroidWebRequestResourceWrapper(Context context, WebRequest request,
-                                          Map<String, Integer> URLtoResourceIdMap,
+                                          Map<String, Integer> urlToResourceIdMap,
                                           Storage storage)
   {
     this.context = context;
     this.request = request;
-    this.URLtoResouceIdMap = Collections.synchronizedMap(URLtoResourceIdMap);
+    this.urlToResourceIdMap = Collections.synchronizedMap(urlToResourceIdMap);
     this.storage = storage;
   }
 
@@ -113,7 +113,7 @@ public class AndroidWebRequestResourceWrapper extends WebRequest
   {
     // since parameters may vary we need to ignore them
     String urlWithoutParams = url.substring(0, url.indexOf("?"));
-    Integer resourceId = URLtoResouceIdMap.get(urlWithoutParams);
+    Integer resourceId = urlToResourceIdMap.get(urlWithoutParams);
 
     if (resourceId != null)
     {
