@@ -110,11 +110,12 @@ public final class AdblockEngine
   public static class Builder
   {
     private Context context;
-    private Map<String, Integer> URLtoResourceIdMap;
+    private Map<String, Integer> urlToResourceIdMap;
     private AndroidWebRequestResourceWrapper.Storage resourceStorage;
     private AndroidWebRequest androidWebRequest;
     private AppInfo appInfo;
     private String basePath;
+    private IsAllowedConnectionCallback isAllowedConnectionCallback;
 
     private AdblockEngine engine;
 
@@ -136,12 +137,18 @@ public final class AdblockEngine
     }
 
     public Builder preloadSubscriptions(Context context,
-                                        Map<String, Integer> URLtoResourceIdMap,
+                                        Map<String, Integer> urlToResourceIdMap,
                                         AndroidWebRequestResourceWrapper.Storage storage)
     {
       this.context = context;
-      this.URLtoResourceIdMap = URLtoResourceIdMap;
+      this.urlToResourceIdMap = urlToResourceIdMap;
       this.resourceStorage = storage;
+      return this;
+    }
+
+    public Builder setIsAllowedConnectionCallback(IsAllowedConnectionCallback callback)
+    {
+      this.isAllowedConnectionCallback = callback;
       return this;
     }
 
@@ -171,13 +178,13 @@ public final class AdblockEngine
 
     private void initRequests()
     {
-      androidWebRequest = new AndroidWebRequest(engine.elemhideEnabled);
+      androidWebRequest = new AndroidWebRequest(engine.elemhideEnabled, true);
       engine.webRequest = androidWebRequest;
 
-      if (URLtoResourceIdMap != null)
+      if (urlToResourceIdMap != null)
       {
         AndroidWebRequestResourceWrapper wrapper = new AndroidWebRequestResourceWrapper(
-          context, engine.webRequest, URLtoResourceIdMap, resourceStorage);
+          context, engine.webRequest, urlToResourceIdMap, resourceStorage);
         wrapper.setListener(engine.resourceWrapperListener);
 
         engine.webRequest = wrapper;
@@ -226,7 +233,7 @@ public final class AdblockEngine
       engine.logSystem = new AndroidLogSystem();
       engine.jsEngine.setLogSystem(engine.logSystem);
 
-      engine.filterEngine = new FilterEngine(engine.jsEngine);
+      engine.filterEngine = new FilterEngine(engine.jsEngine, isAllowedConnectionCallback);
     }
   }
 

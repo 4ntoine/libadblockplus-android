@@ -19,6 +19,7 @@ package org.adblockplus.libadblockplus.android.webviewapp;
 
 import android.content.Context;
 
+import org.adblockplus.libadblockplus.android.AdblockEngine;
 import org.adblockplus.libadblockplus.android.AndroidWebRequestResourceWrapper;
 import org.adblockplus.libadblockplus.android.settings.AdblockHelper;
 
@@ -33,7 +34,7 @@ public class Application extends android.app.Application
     super.onCreate();
 
     // init Adblock
-    String basePath = getDir("adblock", Context.MODE_PRIVATE).getAbsolutePath();
+    String basePath = getDir(AdblockEngine.BASE_PATH_DIRECTORY, Context.MODE_PRIVATE).getAbsolutePath();
 
     // provide preloaded subscriptions
     Map<String, Integer> map = new HashMap<String, Integer>();

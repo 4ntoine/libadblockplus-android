@@ -112,7 +112,7 @@ public class AdblockHelper
    * @param developmentBuild debug or release?
    * @param preferenceName Shared Preferences name to store adblock settings
    */
-  public void init(Context context, String basePath, boolean developmentBuild, String preferenceName)
+  public AdblockHelper init(Context context, String basePath, boolean developmentBuild, String preferenceName)
   {
     this.context = context.getApplicationContext();
     this.basePath = basePath;
@@ -144,11 +144,11 @@ public class AdblockHelper
       Context.MODE_PRIVATE);
     storage = new SharedPrefsStorage(settingsPrefs);
 
-    File basePath = context.getDir(AdblockEngine.BASE_PATH_DIRECTORY, Context.MODE_PRIVATE);
     AdblockEngine.Builder builder = AdblockEngine
       .builder(
         AdblockEngine.generateAppInfo(context, developmentBuild),
-        basePath.getAbsolutePath())
+        basePath)
+      .setIsAllowedConnectionCallback(isAllowedConnectionCallback)
       .enableElementHiding(true);
 
     // if preloaded subscriptions provided
