@@ -36,7 +36,7 @@ public class Application extends android.app.Application
     Map<String, Integer> map = new HashMap<String, Integer>();
     map.put(AndroidWebRequestResourceWrapper.EASYLIST, R.raw.easylist_min);
     map.put(AndroidWebRequestResourceWrapper.EASYLIST_CHINESE, R.raw.easylist_min);
-    map.put(AndroidWebRequestResourceWrapper.ACCEPTABLE_ADS, R.raw.keypartner_whitelist);
+    map.put(AndroidWebRequestResourceWrapper.ACCEPTABLE_ADS, R.raw.exceptionrules_minimal);
 
     AdblockHelper
       .get()
