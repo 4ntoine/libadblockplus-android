@@ -111,13 +111,19 @@ public class AdblockHelper
    *                 recommended because it can be cleared by the system.
    * @param developmentBuild debug or release?
    * @param preferenceName Shared Preferences name to store adblock settings
+   * @param application Technical name of the platform the app is running on (not user visible).
+   * @param applicationVersion Current version of the platform the app is running on.
    */
-  public AdblockHelper init(Context context, String basePath, boolean developmentBuild, String preferenceName)
+  public AdblockHelper init(Context context, String basePath,
+                            boolean developmentBuild, String preferenceName,
+                            String application, String applicationVersion)
   {
     this.context = context.getApplicationContext();
     this.basePath = basePath;
     this.developmentBuild = developmentBuild;
     this.settingsPreferenceName = preferenceName;
+    this.application = application;
+    this.applicationVersion = applicationVersion;
     return this;
   }
 
@@ -130,26 +136,6 @@ public class AdblockHelper
   {
     this.preloadedPreferenceName = preferenceName;
     this.urlToResourceIdMap = urlToResourceIdMap;
-    return this;
-  }
-
-  /**
-   * Technical name of the platform the app is running on (not user visible).
-   * @param application application
-   */
-  public AdblockHelper setApplication(String application)
-  {
-    this.application = application;
-    return this;
-  }
-
-  /**
-   * Current version of the platform the app is running on.
-   * @param applicationVersion platform version
-   */
-  public AdblockHelper setApplicationVersion(String applicationVersion)
-  {
-    this.applicationVersion = applicationVersion;
     return this;
   }
 
