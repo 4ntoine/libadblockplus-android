@@ -22,12 +22,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.adblockplus.libadblockplus.IsAllowedConnectionCallback;
-import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
 import org.adblockplus.libadblockplus.android.AdblockEngine;
 import org.adblockplus.libadblockplus.android.AndroidWebRequestResourceWrapper;
 import org.adblockplus.libadblockplus.android.Utils;
 
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,6 +55,8 @@ public class AdblockHelper
   private String settingsPreferenceName;
   private String preloadedPreferenceName;
   private Map<String, Integer> urlToResourceIdMap;
+  private String application;
+  private String applicationVersion;
   private AdblockEngine engine;
   private AdblockSettingsStorage storage;
   private CountDownLatch engineCreated;
@@ -126,10 +126,31 @@ public class AdblockHelper
    * @param preferenceName Shared Preferences name to store intercepted requests stats
    * @param urlToResourceIdMap
    */
-  public void preloadSubscriptions(String preferenceName, Map<String, Integer> urlToResourceIdMap)
+  public AdblockHelper preloadSubscriptions(String preferenceName, Map<String, Integer> urlToResourceIdMap)
   {
     this.preloadedPreferenceName = preferenceName;
     this.urlToResourceIdMap = urlToResourceIdMap;
+    return this;
+  }
+
+  /**
+   * Use for requests to identify the client
+   * @param application application
+   */
+  public AdblockHelper setApplication(String application)
+  {
+    this.application = application;
+    return this;
+  }
+
+  /**
+   * Use for requests to identify the client
+   * @param applicationVersion application
+   */
+  public AdblockHelper setApplicationVersion(String applicationVersion)
+  {
+    this.applicationVersion = applicationVersion;
+    return this;
   }
 
   private void createAdblock()
@@ -146,7 +167,7 @@ public class AdblockHelper
 
     AdblockEngine.Builder builder = AdblockEngine
       .builder(
-        AdblockEngine.generateAppInfo(context, developmentBuild),
+        AdblockEngine.generateAppInfo(context, developmentBuild, application, applicationVersion),
         basePath)
       .setIsAllowedConnectionCallback(isAllowedConnectionCallback)
       .enableElementHiding(true);

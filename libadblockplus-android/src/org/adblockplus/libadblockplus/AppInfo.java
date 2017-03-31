@@ -44,8 +44,8 @@ public class AppInfo
 
   public static class Builder
   {
-    private String version = "0";
-    private String name = "adblockplusandroid";
+    private String version = "1.0";
+    private String name = "libadblockplus-android";
     private String application = "android";
     private String applicationVersion = "0";
     private String locale = "en_US";
