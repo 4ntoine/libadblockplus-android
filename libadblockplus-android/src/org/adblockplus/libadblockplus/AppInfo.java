@@ -26,8 +26,9 @@ public class AppInfo
   public final String locale;
   public final boolean developmentBuild;
 
-  private AppInfo(final String version, final String name, final String application, final String applicationVersion,
-      final String locale, final boolean developmentBuild)
+  private AppInfo(final String version, final String name,
+                  final String application, final String applicationVersion,
+                  final String locale, final boolean developmentBuild)
   {
     this.version = version;
     this.name = name;

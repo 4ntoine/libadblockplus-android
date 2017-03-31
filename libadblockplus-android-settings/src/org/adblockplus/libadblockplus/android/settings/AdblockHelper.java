@@ -134,7 +134,7 @@ public class AdblockHelper
   }
 
   /**
-   * Use for requests to identify the client
+   * Used for requests to identify the client
    * @param application application
    */
   public AdblockHelper setApplication(String application)
@@ -144,8 +144,8 @@ public class AdblockHelper
   }
 
   /**
-   * Use for requests to identify the client
-   * @param applicationVersion application
+   * Used for requests to identify the client
+   * @param applicationVersion application version
    */
   public AdblockHelper setApplicationVersion(String applicationVersion)
   {
