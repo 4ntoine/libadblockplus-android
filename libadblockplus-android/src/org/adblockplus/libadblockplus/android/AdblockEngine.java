@@ -42,8 +42,6 @@ import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
 import org.adblockplus.libadblockplus.WebRequest;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build.VERSION;
 import android.os.Handler;
 import android.os.Looper;
@@ -251,29 +249,18 @@ public final class AdblockEngine
   private final AndroidWebRequestResourceWrapper.Listener resourceWrapperListener =
     new AndroidWebRequestResourceWrapper.Listener()
   {
-    private static final int UPDATE_DELAY_MS = 1 * 1000;
+    private static final int REFRESH_DELAY_MS = 1 * 1000;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-    private final Runnable forceUpdateRunnable = new Runnable()
+    private final Runnable forceRefreshRunnable = new Runnable()
     {
       public void run() {
         // Filter Engine can be already disposed
         if (filterEngine != null)
         {
-          Log.d(TAG, "Force update subscriptions");
-          List<Subscription> subscriptions = filterEngine.getListedSubscriptions();
-          for (Subscription eachSubscription : subscriptions)
-          {
-            try
-            {
-              eachSubscription.updateFilters();
-            }
-            finally
-            {
-              eachSubscription.dispose();
-            }
-          }
+          Log.d(TAG, "Force refresh subscriptions");
+          AdblockEngine.this.refreshSubscriptions();
         }
       }
     };
@@ -281,15 +268,15 @@ public final class AdblockEngine
     @Override
     public void onIntercepted(String url, int resourceId)
     {
-      // we need to force update subscriptions ASAP after preloaded one is returned
-      // but we should note that multiple interceptions (for main easylist and AA) and force update once only
+      // we need to force refresh subscriptions ASAP after preloaded one is returned
+      // but we should note that multiple interceptions (for main easylist and AA) and force refresh once only
 
-      // adding into main thread queue to avoid concurrency issues (start update while updating)
+      // adding into main thread queue to avoid concurrency issues (start refresh while refreshing)
       // as usually onIntercepted() is invoked in background thread
-      handler.removeCallbacks(forceUpdateRunnable);
-      handler.postDelayed(forceUpdateRunnable, UPDATE_DELAY_MS);
+      handler.removeCallbacks(forceRefreshRunnable);
+      handler.postDelayed(forceRefreshRunnable, REFRESH_DELAY_MS);
 
-      Log.d(TAG, "Scheduled force update in " + UPDATE_DELAY_MS);
+      Log.d(TAG, "Scheduled force refresh in " + REFRESH_DELAY_MS);
     }
   };
 
