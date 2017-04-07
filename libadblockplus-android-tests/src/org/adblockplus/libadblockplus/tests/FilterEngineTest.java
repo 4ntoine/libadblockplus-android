@@ -409,6 +409,8 @@ public class FilterEngineTest extends FilterEngineGenericTest
   @Test
   public void testIsAcceptableAdsIfEnabled()
   {
+    // `.setAcceptableAdsEnabled(true)` is not required, as we're having
+    // AA subscription listed even if AA is disabled with `filterEngine.setAcceptableAdsEnabled(false);`
     if (!filterEngine.isAcceptableAdsEnabled())
     {
       filterEngine.setAcceptableAdsEnabled(true);
@@ -424,24 +426,5 @@ public class FilterEngineTest extends FilterEngineGenericTest
       }
     }
     fail("AA subscription not found in listed subscriptions when enabled");
-  }
-
-  @Test
-  public void testIsAcceptableAdsIfDisabled()
-  {
-    if (filterEngine.isAcceptableAdsEnabled())
-    {
-      filterEngine.setAcceptableAdsEnabled(false);
-    }
-    assertFalse(filterEngine.isAcceptableAdsEnabled());
-
-    List<Subscription> listedSubscriptions = filterEngine.getListedSubscriptions();
-    for (Subscription eachSubscription : listedSubscriptions)
-    {
-      if (eachSubscription.isAcceptableAds())
-      {
-        fail("AA subscription found in listed subscriptions when disabled");
-      }
-    }
   }
 }
