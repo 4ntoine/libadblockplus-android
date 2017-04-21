@@ -36,7 +36,7 @@ JniEventCallback::JniEventCallback(JNIEnv* env, jobject callbackObject)
 {
 }
 
-void JniEventCallback::Callback(AdblockPlus::JsValueList& params)
+void JniEventCallback::Callback(const AdblockPlus::JsValueList& params)
 {
   JNIEnvAcquire env(GetJavaVM());
 

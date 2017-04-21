@@ -224,7 +224,8 @@ static void JNICALL JniSetUpdateAvailableCallback(JNIEnv* env, jclass clazz,
       *JniLongToTypePtr<AdblockPlus::FilterEnginePtr>(ptr);
   JniUpdateAvailableCallback* const callback =
       JniLongToTypePtr<JniUpdateAvailableCallback>(callbackPtr);
-  AdblockPlus::FilterEngine::UpdateAvailableCallback updateAvailableCallback =
+
+  const AdblockPlus::FilterEngine::UpdateAvailableCallback updateAvailableCallback =
       std::bind(&JniUpdateAvailableCallback::Callback, callback,
                      std::placeholders::_1);
   try
@@ -253,7 +254,7 @@ static void JNICALL JniSetFilterChangeCallback(JNIEnv* env, jclass clazz,
   JniFilterChangeCallback* callback = JniLongToTypePtr<JniFilterChangeCallback>(
       filterPtr);
 
-  AdblockPlus::FilterEngine::FilterChangeCallback filterCallback =
+  const AdblockPlus::FilterEngine::FilterChangeCallback filterCallback =
       std::bind(&JniFilterChangeCallback::Callback, callback,
           std::placeholders::_1, std::placeholders::_2);
 
@@ -415,7 +416,7 @@ static jobject JNICALL JniGetPref(JNIEnv* env, jclass clazz, jlong ptr, jstring 
 
   try
   {
-    AdblockPlus::JsValuePtr value = engine->GetPref(pref);
+    AdblockPlus::JsValue value = engine->GetPref(pref);
 
     return NewJniJsValue(env, value);
   }
@@ -427,7 +428,7 @@ static void JNICALL JniSetPref(JNIEnv* env, jclass clazz, jlong ptr, jstring jPr
   AdblockPlus::FilterEnginePtr& engine = *JniLongToTypePtr<AdblockPlus::FilterEnginePtr>(ptr);
 
   std::string pref = JniJavaToStdString(env, jPref);
-  AdblockPlus::JsValuePtr value = JniGetJsValuePtr(jsValue);
+  const AdblockPlus::JsValue& value = JniGetJsValue(jsValue);
 
   try
   {

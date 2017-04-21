@@ -56,7 +56,8 @@ static void JNICALL JniSetEventCallback(JNIEnv* env, jclass clazz, jlong ptr, js
 
   JniEventCallback* callback = JniLongToTypePtr<JniEventCallback>(jCallbackPtr);
   std::string eventName = JniJavaToStdString(env, jEventName);
-  AdblockPlus::JsEngine::EventCallback eCallback = std::bind(&JniEventCallback::Callback, callback, std::placeholders::_1);
+  const AdblockPlus::JsEngine::EventCallback eCallback =
+    std::bind(&JniEventCallback::Callback, callback, std::placeholders::_1);
 
   try
   {
@@ -87,7 +88,7 @@ static jobject JNICALL JniEvaluate(JNIEnv* env, jclass clazz, jlong ptr, jstring
 
   try
   {
-    AdblockPlus::JsValuePtr jsValue = engine->Evaluate(source, filename);
+    AdblockPlus::JsValue jsValue = engine->Evaluate(source, filename);
     return NewJniJsValue(env, jsValue);
   }
   CATCH_THROW_AND_RETURN(env, 0)
@@ -107,7 +108,7 @@ static void JNICALL JniTriggerEvent(JNIEnv* env, jclass clazz, jlong ptr, jstrin
 
     for (jsize i = 0; i < length; i++)
     {
-      args.push_back(JniGetJsValuePtr(ptrs[i]));
+      args.push_back(JniGetJsValue(ptrs[i]));
     }
 
     env->ReleasePrimitiveArrayCritical(jJsPtrs, ptrs, JNI_ABORT);
@@ -126,7 +127,7 @@ static void JNICALL JniSetDefaultFileSystem(JNIEnv* env, jclass clazz, jlong ptr
 
   try
   {
-    AdblockPlus::FileSystemPtr fileSystem(new AdblockPlus::DefaultFileSystem());
+    const AdblockPlus::FileSystemPtr fileSystem(new AdblockPlus::DefaultFileSystem());
 
     std::string basePath = JniJavaToStdString(env, jBasePath);
     reinterpret_cast<AdblockPlus::DefaultFileSystem*>(fileSystem.get())->SetBasePath(basePath);
@@ -142,8 +143,7 @@ static void JNICALL JniSetDefaultWebRequest(JNIEnv* env, jclass clazz, jlong ptr
 
   try
   {
-    AdblockPlus::WebRequestPtr webRequest(new AdblockPlus::DefaultWebRequest());
-
+    const AdblockPlus::WebRequestPtr webRequest(new AdblockPlus::DefaultWebRequest());
     engine->SetWebRequest(webRequest);
   }
   CATCH_AND_THROW(env)
@@ -155,7 +155,7 @@ static void JNICALL JniSetDefaultLogSystem(JNIEnv* env, jclass clazz, jlong ptr)
 
   try
   {
-    AdblockPlus::LogSystemPtr logSystem(new AdblockPlus::DefaultLogSystem());
+    const AdblockPlus::LogSystemPtr logSystem(new AdblockPlus::DefaultLogSystem());
 
     engine->SetLogSystem(logSystem);
   }
@@ -168,7 +168,7 @@ static void JNICALL JniSetLogSystem(JNIEnv* env, jclass clazz, jlong ptr, jlong 
 
   try
   {
-    AdblockPlus::LogSystemPtr logSystem = *JniLongToTypePtr<AdblockPlus::LogSystemPtr>(logSystemPtr);
+    const AdblockPlus::LogSystemPtr logSystem = *JniLongToTypePtr<AdblockPlus::LogSystemPtr>(logSystemPtr);
 
     engine->SetLogSystem(logSystem);
   }
@@ -181,7 +181,8 @@ static void JNICALL JniSetWebRequest(JNIEnv* env, jclass clazz, jlong ptr, jlong
 
   try
   {
-    AdblockPlus::WebRequestPtr& webRequest = *JniLongToTypePtr<AdblockPlus::WebRequestPtr>(webRequestPtr);
+    const AdblockPlus::WebRequestPtr& webRequest =
+      *JniLongToTypePtr<AdblockPlus::WebRequestPtr>(webRequestPtr);
 
     engine->SetWebRequest(webRequest);
   }
@@ -194,7 +195,7 @@ static jobject JNICALL JniNewLongValue(JNIEnv* env, jclass clazz, jlong ptr, jlo
 
   try
   {
-    AdblockPlus::JsValuePtr jsValue = engine->NewValue(static_cast<int64_t>(value));
+    AdblockPlus::JsValue jsValue = engine->NewValue(static_cast<int64_t>(value));
     return NewJniJsValue(env, jsValue);
   }
   CATCH_THROW_AND_RETURN(env, 0)
@@ -206,7 +207,7 @@ static jobject JNICALL JniNewBooleanValue(JNIEnv* env, jclass clazz, jlong ptr, 
 
   try
   {
-    AdblockPlus::JsValuePtr jsValue = engine->NewValue(value == JNI_TRUE ? true : false);
+    AdblockPlus::JsValue jsValue = engine->NewValue(value == JNI_TRUE ? true : false);
     return NewJniJsValue(env, jsValue);
   }
   CATCH_THROW_AND_RETURN(env, 0)
@@ -219,15 +220,15 @@ static jobject JNICALL JniNewStringValue(JNIEnv* env, jclass clazz, jlong ptr, j
   try
   {
     std::string strValue = JniJavaToStdString(env, value);
-    AdblockPlus::JsValuePtr jsValue = engine->NewValue(strValue);
+    AdblockPlus::JsValue jsValue = engine->NewValue(strValue);
     return NewJniJsValue(env, jsValue);
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
 
 // TODO: List of functions that lack JNI bindings
-//JsValuePtr NewObject();
-//JsValuePtr NewCallback(v8::InvocationCallback callback);
+//JsValue NewObject();
+//JsValue NewCallback(v8::InvocationCallback callback);
 //static JsEnginePtr FromArguments(const v8::Arguments& arguments);
 //JsValueList ConvertArguments(const v8::Arguments& arguments);
 
