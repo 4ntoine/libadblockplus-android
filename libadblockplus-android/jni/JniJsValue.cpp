@@ -119,7 +119,8 @@ static jstring JNICALL JniAsString(JNIEnv* env, jclass clazz, jlong ptr)
 {
   try
   {
-    return env->NewStringUTF(JniGetJsValuePtr(ptr)->AsString().c_str());
+    AdblockPlus::JsValue* jsValue = JniGetJsValuePtr(ptr);
+    return env->NewStringUTF(jsValue->AsString().c_str());
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -157,7 +158,8 @@ static jobject JNICALL JniGetProperty(JNIEnv* env, jclass clazz, jlong ptr, jstr
 {
   try
   {
-    return NewJniJsValue(env, JniGetJsValuePtr(ptr)->GetProperty(JniJavaToStdString(env, name)));
+    AdblockPlus::JsValue* jsValue = JniGetJsValuePtr(ptr);
+    return NewJniJsValue(env, jsValue->GetProperty(JniJavaToStdString(env, name)));
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -169,8 +171,7 @@ static void JNICALL JniDtor(JNIEnv* env, jclass clazz, jlong ptr)
 
 jobject NewJniJsValue(JNIEnv* env, const AdblockPlus::JsValue& jsValue, jclass jsValueClassArg)
 {
-  jlong jptr = JniPtrToLong((void*)&jsValue);
-  return env->NewObject(jsValueClass->Get(), jsValueCtor, jptr);
+  return env->NewObject(jsValueClass->Get(), jsValueCtor, new AdblockPlus::JsValue(jsValue));
 }
 
 AdblockPlus::JsValue* JniGetJsValuePtr(jlong ptr)

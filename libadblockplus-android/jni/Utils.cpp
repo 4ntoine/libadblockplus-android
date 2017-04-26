@@ -166,11 +166,6 @@ JNIEnvAcquire::~JNIEnvAcquire()
 template<typename T>
 static jobject NewJniObject(JNIEnv* env, const T& value, jclass clazz, jmethodID ctor)
 {
-  if (!value.get())
-  {
-    return 0;
-  }
-
   return env->NewObject(clazz, ctor, JniPtrToLong(new T(value)));
 }
 
@@ -182,19 +177,17 @@ static jobject NewJniObject(JNIEnv* env, const T& value, const char* javaClass)
   return NewJniObject(env, value, *clazz, ctor);
 }
 
-jobject NewJniFilter(JNIEnv* env, const AdblockPlus::FilterPtr& filter)
+jobject NewJniFilter(JNIEnv* env, AdblockPlus::Filter& filter)
 {
   return NewJniObject(env, filter, filterClass->Get(), filterCtor);
 }
 
-jobject NewJniSubscription(JNIEnv* env,
-    const AdblockPlus::SubscriptionPtr& subscription)
+jobject NewJniSubscription(JNIEnv* env, AdblockPlus::Subscription& subscription)
 {
   return NewJniObject(env, subscription, subscriptionClass->Get(), subscriptionCtor);
 }
 
-jobject NewJniNotification(JNIEnv* env,
-    const AdblockPlus::NotificationPtr& notification)
+jobject NewJniNotification(JNIEnv* env, AdblockPlus::Notification& notification)
 {
   return NewJniObject(env, notification, notificationClass->Get(), notificationCtor);
 }

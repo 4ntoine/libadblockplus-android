@@ -88,7 +88,7 @@ class JniShowNotificationCallback : public JniCallbackBase
 {
 public:
   JniShowNotificationCallback(JNIEnv* env, jobject callbackObject);
-  void Callback(const AdblockPlus::NotificationPtr&);
+  void Callback(AdblockPlus::Notification&);
 };
 
 class JniWebRequest : public JniCallbackBase, public AdblockPlus::WebRequest
