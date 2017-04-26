@@ -177,17 +177,17 @@ static jobject NewJniObject(JNIEnv* env, const T& value, const char* javaClass)
   return NewJniObject(env, value, *clazz, ctor);
 }
 
-jobject NewJniFilter(JNIEnv* env, AdblockPlus::Filter& filter)
+jobject NewJniFilter(JNIEnv* env, const AdblockPlus::Filter& filter)
 {
   return NewJniObject(env, filter, filterClass->Get(), filterCtor);
 }
 
-jobject NewJniSubscription(JNIEnv* env, AdblockPlus::Subscription& subscription)
+jobject NewJniSubscription(JNIEnv* env, const AdblockPlus::Subscription& subscription)
 {
   return NewJniObject(env, subscription, subscriptionClass->Get(), subscriptionCtor);
 }
 
-jobject NewJniNotification(JNIEnv* env, AdblockPlus::Notification& notification)
+jobject NewJniNotification(JNIEnv* env, const AdblockPlus::Notification& notification)
 {
   return NewJniObject(env, notification, notificationClass->Get(), notificationCtor);
 }

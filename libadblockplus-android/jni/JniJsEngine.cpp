@@ -56,7 +56,7 @@ static void JNICALL JniSetEventCallback(JNIEnv* env, jclass clazz, jlong ptr, js
 
   JniEventCallback* callback = JniLongToTypePtr<JniEventCallback>(jCallbackPtr);
   std::string eventName = JniJavaToStdString(env, jEventName);
-  const AdblockPlus::JsEngine::EventCallback eCallback =
+  AdblockPlus::JsEngine::EventCallback eCallback =
     std::bind(&JniEventCallback::Callback, callback, std::placeholders::_1);
 
   try
@@ -88,8 +88,7 @@ static jobject JNICALL JniEvaluate(JNIEnv* env, jclass clazz, jlong ptr, jstring
 
   try
   {
-    AdblockPlus::JsValue jsValue = engine->Evaluate(source, filename);
-    return NewJniJsValue(env, jsValue);
+    return NewJniJsValue(env, engine->Evaluate(source, filename));
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -127,7 +126,7 @@ static void JNICALL JniSetDefaultFileSystem(JNIEnv* env, jclass clazz, jlong ptr
 
   try
   {
-    const AdblockPlus::FileSystemPtr fileSystem(new AdblockPlus::DefaultFileSystem());
+    AdblockPlus::FileSystemPtr fileSystem(new AdblockPlus::DefaultFileSystem());
 
     std::string basePath = JniJavaToStdString(env, jBasePath);
     reinterpret_cast<AdblockPlus::DefaultFileSystem*>(fileSystem.get())->SetBasePath(basePath);
@@ -143,7 +142,7 @@ static void JNICALL JniSetDefaultWebRequest(JNIEnv* env, jclass clazz, jlong ptr
 
   try
   {
-    const AdblockPlus::WebRequestPtr webRequest(new AdblockPlus::DefaultWebRequest());
+    AdblockPlus::WebRequestPtr webRequest(new AdblockPlus::DefaultWebRequest());
     engine->SetWebRequest(webRequest);
   }
   CATCH_AND_THROW(env)
@@ -155,7 +154,7 @@ static void JNICALL JniSetDefaultLogSystem(JNIEnv* env, jclass clazz, jlong ptr)
 
   try
   {
-    const AdblockPlus::LogSystemPtr logSystem(new AdblockPlus::DefaultLogSystem());
+    AdblockPlus::LogSystemPtr logSystem(new AdblockPlus::DefaultLogSystem());
 
     engine->SetLogSystem(logSystem);
   }
@@ -168,7 +167,8 @@ static void JNICALL JniSetLogSystem(JNIEnv* env, jclass clazz, jlong ptr, jlong 
 
   try
   {
-    const AdblockPlus::LogSystemPtr logSystem = *JniLongToTypePtr<AdblockPlus::LogSystemPtr>(logSystemPtr);
+    AdblockPlus::LogSystemPtr logSystem =
+      *JniLongToTypePtr<AdblockPlus::LogSystemPtr>(logSystemPtr);
 
     engine->SetLogSystem(logSystem);
   }
@@ -181,7 +181,7 @@ static void JNICALL JniSetWebRequest(JNIEnv* env, jclass clazz, jlong ptr, jlong
 
   try
   {
-    const AdblockPlus::WebRequestPtr& webRequest =
+    AdblockPlus::WebRequestPtr& webRequest =
       *JniLongToTypePtr<AdblockPlus::WebRequestPtr>(webRequestPtr);
 
     engine->SetWebRequest(webRequest);
@@ -195,8 +195,7 @@ static jobject JNICALL JniNewLongValue(JNIEnv* env, jclass clazz, jlong ptr, jlo
 
   try
   {
-    AdblockPlus::JsValue jsValue = engine->NewValue(static_cast<int64_t>(value));
-    return NewJniJsValue(env, jsValue);
+    return NewJniJsValue(env, engine->NewValue(static_cast<int64_t>(value)));
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -207,8 +206,7 @@ static jobject JNICALL JniNewBooleanValue(JNIEnv* env, jclass clazz, jlong ptr, 
 
   try
   {
-    AdblockPlus::JsValue jsValue = engine->NewValue(value == JNI_TRUE ? true : false);
-    return NewJniJsValue(env, jsValue);
+    return NewJniJsValue(env, engine->NewValue(value == JNI_TRUE ? true : false));
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -220,8 +218,7 @@ static jobject JNICALL JniNewStringValue(JNIEnv* env, jclass clazz, jlong ptr, j
   try
   {
     std::string strValue = JniJavaToStdString(env, value);
-    AdblockPlus::JsValue jsValue = engine->NewValue(strValue);
-    return NewJniJsValue(env, jsValue);
+    return NewJniJsValue(env, engine->NewValue(strValue));
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
