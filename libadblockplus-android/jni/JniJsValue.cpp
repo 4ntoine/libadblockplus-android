@@ -158,8 +158,7 @@ static jobject JNICALL JniGetProperty(JNIEnv* env, jclass clazz, jlong ptr, jstr
 {
   try
   {
-    AdblockPlus::JsValue* jsValue = JniGetJsValuePtr(ptr);
-    return NewJniJsValue(env, jsValue->GetProperty(JniJavaToStdString(env, name)));
+    return NewJniJsValue(env, JniGetJsValuePtr(ptr)->GetProperty(JniJavaToStdString(env, name)));
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
