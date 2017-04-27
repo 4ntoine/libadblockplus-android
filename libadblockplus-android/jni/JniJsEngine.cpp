@@ -167,8 +167,7 @@ static void JNICALL JniSetLogSystem(JNIEnv* env, jclass clazz, jlong ptr, jlong 
 
   try
   {
-    AdblockPlus::LogSystemPtr logSystem =
-      *JniLongToTypePtr<AdblockPlus::LogSystemPtr>(logSystemPtr);
+    AdblockPlus::LogSystemPtr logSystem = *JniLongToTypePtr<AdblockPlus::LogSystemPtr>(logSystemPtr);
 
     engine->SetLogSystem(logSystem);
   }
@@ -181,8 +180,7 @@ static void JNICALL JniSetWebRequest(JNIEnv* env, jclass clazz, jlong ptr, jlong
 
   try
   {
-    AdblockPlus::WebRequestPtr& webRequest =
-      *JniLongToTypePtr<AdblockPlus::WebRequestPtr>(webRequestPtr);
+    AdblockPlus::WebRequestPtr& webRequest = *JniLongToTypePtr<AdblockPlus::WebRequestPtr>(webRequestPtr);
 
     engine->SetWebRequest(webRequest);
   }
@@ -224,8 +222,8 @@ static jobject JNICALL JniNewStringValue(JNIEnv* env, jclass clazz, jlong ptr, j
 }
 
 // TODO: List of functions that lack JNI bindings
-//JsValue NewObject();
-//JsValue NewCallback(v8::InvocationCallback callback);
+//JsValuePtr NewObject();
+//JsValuePtr NewCallback(v8::InvocationCallback callback);
 //static JsEnginePtr FromArguments(const v8::Arguments& arguments);
 //JsValueList ConvertArguments(const v8::Arguments& arguments);
 
