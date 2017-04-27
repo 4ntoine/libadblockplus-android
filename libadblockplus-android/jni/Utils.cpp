@@ -166,7 +166,7 @@ JNIEnvAcquire::~JNIEnvAcquire()
 template<typename T>
 static jobject NewJniObject(JNIEnv* env, const T& value, jclass clazz, jmethodID ctor)
 {
-  return env->NewObject(clazz, ctor, JniPtrToLong(new T(value)));
+  return env->NewObject(clazz, ctor, JniPtrToLong(new T(std::move(value))));
 }
 
 template<typename T>

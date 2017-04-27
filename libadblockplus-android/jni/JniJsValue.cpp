@@ -170,7 +170,7 @@ static void JNICALL JniDtor(JNIEnv* env, jclass clazz, jlong ptr)
 
 jobject NewJniJsValue(JNIEnv* env, const AdblockPlus::JsValue& jsValue, jclass jsValueClassArg)
 {
-  return env->NewObject(jsValueClass->Get(), jsValueCtor, new AdblockPlus::JsValue(jsValue));
+  return env->NewObject(jsValueClass->Get(), jsValueCtor, new AdblockPlus::JsValue(std::move(jsValue)));
 }
 
 AdblockPlus::JsValue* JniGetJsValuePtr(jlong ptr)
@@ -189,8 +189,7 @@ jobject JniJsValueListToArrayList(JNIEnv* env, const AdblockPlus::JsValueList& l
 
   for (AdblockPlus::JsValueList::const_iterator it = list.begin(), end = list.end(); it != end; ++it)
   {
-    JniAddObjectToList(env, arrayList,
-        *JniLocalReference<jobject>(env, NewJniJsValue(env, *it)));
+    JniAddObjectToList(env, arrayList, *JniLocalReference<jobject>(env, NewJniJsValue(env, *it)));
   }
 
   return arrayList;
