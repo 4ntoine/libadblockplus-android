@@ -34,7 +34,7 @@ public class IsAllowedConnectionCallbackTest extends BaseJsTest
 {
   private static final int UPDATE_SUBSCRIPTIONS_WAIT_DELAY_MS = 5 * 1000; // 5s
 
-  private class TestRequest extends AndroidWebRequest
+  private static final class TestRequest extends AndroidWebRequest
   {
     private List<String> urls = new LinkedList<String>();
 
@@ -51,7 +51,7 @@ public class IsAllowedConnectionCallbackTest extends BaseJsTest
     }
   }
 
-  private class TestCallback extends IsAllowedConnectionCallback
+  private static final class TestCallback extends IsAllowedConnectionCallback
   {
     private boolean result;
     private boolean invoked;
