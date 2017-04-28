@@ -40,7 +40,7 @@ public class AndroidWebRequestResourceWrapperTest extends FilterEngineGenericTes
 {
   private static final int UPDATE_SUBSCRIPTIONS_WAIT_DELAY_MS = 5 * 1000; // 5s
 
-  private class TestRequest extends AndroidWebRequest
+  private static final class TestRequest extends AndroidWebRequest
   {
     private List<String> urls = new LinkedList<String>();
 
@@ -58,7 +58,7 @@ public class AndroidWebRequestResourceWrapperTest extends FilterEngineGenericTes
   }
 
   // in-memory storage for testing only
-  private class TestStorage implements AndroidWebRequestResourceWrapper.Storage
+  private static final class TestStorage implements AndroidWebRequestResourceWrapper.Storage
   {
     private Set<String> interceptedUrls = new HashSet<String>();
 
@@ -80,7 +80,7 @@ public class AndroidWebRequestResourceWrapperTest extends FilterEngineGenericTes
     }
   }
 
-  private class TestWrapperListener implements AndroidWebRequestResourceWrapper.Listener
+  private static final class TestWrapperListener implements AndroidWebRequestResourceWrapper.Listener
   {
     private Map<String, Integer> urlsToResourceId = new HashMap<String, Integer>();
 
