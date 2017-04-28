@@ -409,8 +409,6 @@ public class FilterEngineTest extends FilterEngineGenericTest
   @Test
   public void testIsAcceptableAdsIfEnabled()
   {
-    // `.setAcceptableAdsEnabled(true)` is not required, as we're having
-    // AA subscription listed even if AA is disabled with `filterEngine.setAcceptableAdsEnabled(false);`
     if (!filterEngine.isAcceptableAdsEnabled())
     {
       filterEngine.setAcceptableAdsEnabled(true);
