@@ -504,7 +504,7 @@ static jboolean JNICALL JniIsAcceptableAdsEnabled(JNIEnv* env, jclass clazz, jlo
   try
   {
     AdblockPlus::FilterEnginePtr& engine = *JniLongToTypePtr<AdblockPlus::FilterEnginePtr>(ptr);
-    return (engine->IsAAEnabled() ? JNI_TRUE : JNI_FALSE);
+    return engine->IsAAEnabled() ? JNI_TRUE : JNI_FALSE;
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
