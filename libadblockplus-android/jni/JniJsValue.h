@@ -27,9 +27,9 @@ void JniJsValue_OnUnload(JavaVM* vm, JNIEnv* env, void* reserved);
 
 jclass GetJsValueClass();
 
-jobject NewJniJsValue(JNIEnv* env, const AdblockPlus::JsValue& jsValue, jclass jsValueClass = 0);
+jobject NewJniJsValue(JNIEnv* env, AdblockPlus::JsValue&& jsValue, jclass jsValueClass = 0);
 
-jobject JniJsValueListToArrayList(JNIEnv* env, const AdblockPlus::JsValueList& list);
+jobject JniJsValueListToArrayList(JNIEnv* env, AdblockPlus::JsValueList&& list);
 
 AdblockPlus::JsValue* JniGetJsValuePtr(jlong ptr);
 

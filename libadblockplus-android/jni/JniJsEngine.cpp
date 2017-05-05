@@ -56,8 +56,11 @@ static void JNICALL JniSetEventCallback(JNIEnv* env, jclass clazz, jlong ptr, js
 
   JniEventCallback* callback = JniLongToTypePtr<JniEventCallback>(jCallbackPtr);
   std::string eventName = JniJavaToStdString(env, jEventName);
-  AdblockPlus::JsEngine::EventCallback eCallback =
-    std::bind(&JniEventCallback::Callback, callback, std::placeholders::_1);
+
+  auto eCallback = [callback](AdblockPlus::JsValueList&& params)
+  {
+    callback->Callback(std::move(params));
+  };
 
   try
   {
@@ -115,7 +118,7 @@ static void JNICALL JniTriggerEvent(JNIEnv* env, jclass clazz, jlong ptr, jstrin
 
   try
   {
-    engine->TriggerEvent(eventName, args);
+    engine->TriggerEvent(eventName, std::move(args));
   }
   CATCH_AND_THROW(env)
 }

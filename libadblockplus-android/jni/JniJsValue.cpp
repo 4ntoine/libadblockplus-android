@@ -147,9 +147,7 @@ static jobject JNICALL JniAsList(JNIEnv* env, jclass clazz, jlong ptr)
 {
   try
   {
-    AdblockPlus::JsValueList list = JniGetJsValuePtr(ptr)->AsList();
-
-    return JniJsValueListToArrayList(env, list);
+    return JniJsValueListToArrayList(env, JniGetJsValuePtr(ptr)->AsList());
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -168,7 +166,7 @@ static void JNICALL JniDtor(JNIEnv* env, jclass clazz, jlong ptr)
   delete JniLongToTypePtr<AdblockPlus::JsValue>(ptr);
 }
 
-jobject NewJniJsValue(JNIEnv* env, const AdblockPlus::JsValue& jsValue, jclass jsValueClassArg)
+jobject NewJniJsValue(JNIEnv* env, AdblockPlus::JsValue&& jsValue, jclass jsValueClassArg)
 {
   return env->NewObject(jsValueClass->Get(), jsValueCtor, new AdblockPlus::JsValue(std::move(jsValue)));
 }
@@ -183,13 +181,13 @@ AdblockPlus::JsValue& JniGetJsValue(jlong ptr)
   return *JniLongToTypePtr<AdblockPlus::JsValue>(ptr);
 }
 
-jobject JniJsValueListToArrayList(JNIEnv* env, const AdblockPlus::JsValueList& list)
+jobject JniJsValueListToArrayList(JNIEnv* env, AdblockPlus::JsValueList&& list)
 {
   jobject arrayList = NewJniArrayList(env);
 
-  for (AdblockPlus::JsValueList::const_iterator it = list.begin(), end = list.end(); it != end; ++it)
+  for (AdblockPlus::JsValueList::iterator it = list.begin(), end = list.end(); it != end; ++it)
   {
-    JniAddObjectToList(env, arrayList, *JniLocalReference<jobject>(env, NewJniJsValue(env, *it)));
+    JniAddObjectToList(env, arrayList, *JniLocalReference<jobject>(env, NewJniJsValue(env, std::move(*it))));
   }
 
   return arrayList;
