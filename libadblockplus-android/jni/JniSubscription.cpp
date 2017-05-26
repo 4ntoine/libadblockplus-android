@@ -37,7 +37,7 @@ static void JNICALL JniSetDisabled(JNIEnv* env, jclass clazz, jlong ptr, jboolea
 {
   try
   {
-    return GetSubscriptionPtr(ptr)->SetDisabled((bool)(disabled == JNI_TRUE));
+    return GetSubscriptionPtr(ptr)->SetDisabled(disabled == JNI_TRUE);
   }
   CATCH_AND_THROW(env)
 }
