@@ -45,14 +45,14 @@ public class Platform implements Disposable
     this.disposer = new Disposer(this, new DisposeWrapper(ptr));
   }
 
-  public void setUpJsEngine(final AppInfo appInfo, final Long v8IsolatePtr)
+  public void setUpJsEngine(final AppInfo appInfo, final long v8IsolatePtr)
   {
-    setUpJsEngine(this.ptr, appInfo, (v8IsolatePtr != null ? v8IsolatePtr.longValue() : 0L));
+    setUpJsEngine(this.ptr, appInfo, v8IsolatePtr);
   }
 
   public void setUpJsEngine(final AppInfo appInfo)
   {
-    setUpJsEngine(appInfo, null);
+    setUpJsEngine(appInfo, 0L);
   }
 
   public JsEngine getJsEngine()

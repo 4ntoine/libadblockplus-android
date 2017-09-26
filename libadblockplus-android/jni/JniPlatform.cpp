@@ -31,11 +31,6 @@ class V8IsolateHolder : public AdblockPlus::IV8IsolateProvider
     {
     }
 
-    ~V8IsolateHolder()
-    {
-      isolate = nullptr;
-    }
-
     v8::Isolate* Get() override
     {
       return isolate;
@@ -103,11 +98,10 @@ static void JNICALL JniSetUpJsEngine(JNIEnv* env, jclass clazz, jlong ptr, jobje
   {
     AdblockPlus::AppInfo appInfo;
     TransformAppInfo(env, jAppInfo, appInfo);
-    std::unique_ptr<AdblockPlus::IV8IsolateProvider> isolateProvider = nullptr;
+    std::unique_ptr<AdblockPlus::IV8IsolateProvider> isolateProvider;
     if (v8IsolatePtr)
     {
-      isolateProvider = std::unique_ptr<AdblockPlus::IV8IsolateProvider>(
-        new V8IsolateHolder((v8::Isolate*)v8IsolatePtr));
+      isolateProvider.reset(new V8IsolateHolder(reinterpret_cast<v8::Isolate*>(v8IsolatePtr)));
     }
 
     GetPlatformRef(ptr).SetUpJsEngine(appInfo, std::move(isolateProvider));

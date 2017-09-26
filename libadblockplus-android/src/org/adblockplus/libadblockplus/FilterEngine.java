@@ -196,14 +196,6 @@ public final class FilterEngine
     updateFiltersAsync(this.ptr, subscriptionUrl);
   }
 
-  /**
-   * Get FilterEngine pointer
-   * @return C++ FilterEngine instance pointer
-   */
-  public long getFilterEnginePtr() {
-    return getFilterEnginePtr(this.ptr);
-  }
-
   private final static native void registerNatives();
 
   private final static native boolean isFirstRun(long ptr);
@@ -261,6 +253,4 @@ public final class FilterEngine
   private final static native String getAcceptableAdsSubscriptionURL(long ptr);
 
   private final static native void updateFiltersAsync(long ptr, String subscriptionUrl);
-
-  private final static native long getFilterEnginePtr(long ptr);
 }

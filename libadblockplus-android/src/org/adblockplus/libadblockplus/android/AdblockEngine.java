@@ -262,7 +262,14 @@ public final class AdblockEngine
     {
       engine.logSystem = new AndroidLogSystem();
       engine.platform = new Platform(engine.logSystem, engine.webRequest, basePath);
-      engine.platform.setUpJsEngine(appInfo, v8IsolatePtr);
+      if (v8IsolatePtr != null)
+      {
+        engine.platform.setUpJsEngine(appInfo, v8IsolatePtr);
+      }
+      else
+      {
+        engine.platform.setUpJsEngine(appInfo);
+      }
       engine.platform.setUpFilterEngine(isAllowedConnectionCallback);
       engine.filterEngine = engine.platform.getFilterEngine();
     }
