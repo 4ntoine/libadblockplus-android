@@ -133,6 +133,7 @@ public final class AdblockEngine
     private AppInfo appInfo;
     private String basePath;
     private IsAllowedConnectionCallback isAllowedConnectionCallback;
+    private Long v8IsolatePtr;
 
     private AdblockEngine engine;
 
@@ -166,6 +167,12 @@ public final class AdblockEngine
     public Builder setIsAllowedConnectionCallback(IsAllowedConnectionCallback callback)
     {
       this.isAllowedConnectionCallback = callback;
+      return this;
+    }
+
+    public Builder useV8Isolate(long v8IsolatePtr)
+    {
+      this.v8IsolatePtr = v8IsolatePtr;
       return this;
     }
 
@@ -255,7 +262,7 @@ public final class AdblockEngine
     {
       engine.logSystem = new AndroidLogSystem();
       engine.platform = new Platform(engine.logSystem, engine.webRequest, basePath);
-      engine.platform.setUpJsEngine(appInfo);
+      engine.platform.setUpJsEngine(appInfo, v8IsolatePtr);
       engine.platform.setUpFilterEngine(isAllowedConnectionCallback);
       engine.filterEngine = engine.platform.getFilterEngine();
     }
