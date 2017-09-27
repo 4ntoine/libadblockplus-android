@@ -9,7 +9,7 @@ else
 
 SHARED_V8_LIB_FILENAME_LIST = $(subst :, ,$(SHARED_V8_LIB_FILENAME))
 define info_define
-	$(info [Configuration] Linking dynamically with shared v8 library ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/$1)
+    $(info [Configuration] Linking dynamically with shared v8 library ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/$1)
 endef
 $(foreach item,$(SHARED_V8_LIB_FILENAME_LIST),$(eval $(call info_define,$(item))))
 endif
@@ -72,12 +72,12 @@ else
 
 SHARED_V8_LIB_FILENAME_LIST = $(subst :, ,$(SHARED_V8_LIB_FILENAME))
 define libv8_define
-	include $(CLEAR_VARS)	
+    include $(CLEAR_VARS)	
 
-	LOCAL_MODULE := $1
-	LOCAL_SRC_FILES := ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/$1
+    LOCAL_MODULE := $1
+    LOCAL_SRC_FILES := ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/$1
 
-	include $(PREBUILT_SHARED_LIBRARY)
+    include $(PREBUILT_SHARED_LIBRARY)
 endef
 $(foreach item,$(SHARED_V8_LIB_FILENAME_LIST),$(eval $(call libv8_define,$(item))))
 
