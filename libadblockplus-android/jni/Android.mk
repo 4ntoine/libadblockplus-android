@@ -72,7 +72,7 @@ else
 
 SHARED_V8_LIB_FILENAME_LIST = $(subst :, ,$(SHARED_V8_LIB_FILENAME))
 define libv8_define
-    include $(CLEAR_VARS)	
+    include $(CLEAR_VARS)
 
     LOCAL_MODULE := $1
     LOCAL_SRC_FILES := ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/$1
