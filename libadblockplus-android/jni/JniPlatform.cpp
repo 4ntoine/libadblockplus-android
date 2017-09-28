@@ -101,7 +101,7 @@ static void JNICALL JniSetUpJsEngine(JNIEnv* env, jclass clazz, jlong ptr, jobje
     std::unique_ptr<AdblockPlus::IV8IsolateProvider> isolateProvider;
     if (v8IsolatePtr)
     {
-      isolateProvider.reset(new V8IsolateHolder(reinterpret_cast<v8::Isolate*>(v8IsolatePtr)));
+      isolateProvider.reset(new V8IsolateHolder(JniLongToTypePtr<v8::Isolate>(v8IsolatePtr)));
     }
 
     GetPlatformRef(ptr).SetUpJsEngine(appInfo, std::move(isolateProvider));
