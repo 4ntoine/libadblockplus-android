@@ -7,7 +7,8 @@ $(info [Configuration] Linking statically with built-in v8)
 else
 # dynamic
 
-SHARED_V8_LIB_FILENAMES_LIST = $(subst :, ,$(SHARED_V8_LIB_FILENAMES))
+comma = ,
+SHARED_V8_LIB_FILENAMES_LIST = $(subst $(comma), ,$(SHARED_V8_LIB_FILENAMES))
 define info_define
     $(info [Configuration] Linking dynamically with shared v8 library ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/$1)
 endef
@@ -70,7 +71,7 @@ else
 
 # prebuilt shared libraries v8
 
-SHARED_V8_LIB_FILENAMES_LIST = $(subst :, ,$(SHARED_V8_LIB_FILENAMES))
+SHARED_V8_LIB_FILENAMES_LIST = $(subst $(comma), ,$(SHARED_V8_LIB_FILENAMES))
 define libv8_define
     include $(CLEAR_VARS)
 
@@ -108,7 +109,7 @@ ifeq ($(SHARED_V8_LIB_FILENAMES),)
 LOCAL_STATIC_LIBRARIES += v8-base v8-snapshot v8-libsampler v8-libbase
 else
 # dynamic
-SHARED_V8_LIB_FILENAMES_LIST = $(subst :, ,$(SHARED_V8_LIB_FILENAMES))
+SHARED_V8_LIB_FILENAMES_LIST = $(subst $(comma), ,$(SHARED_V8_LIB_FILENAMES))
 LOCAL_STATIC_LIBRARIES += $(SHARED_V8_LIB_FILENAMES_LIST)
 endif
 
