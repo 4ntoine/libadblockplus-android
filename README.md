@@ -94,17 +94,17 @@ An app that uses the library have to add the following permissions to `AndroidMa
 ### Building with prebuilt shared V8
 
 This can be desired to use product's V8 (let's say Chromium) instead of libadblockplus built-in V8.
-Put prebuilt shared V8 library file(s) in ARCH directories and set `SHARED_V8_LIB_FILENAME`
+Put prebuilt shared V8 library file(s) in ARCH directories and set `SHARED_V8_LIB_FILENAMES`
 environment variable before building. You can pass multiple filenames, separated with `:`.
 Libadblockplus is required to be linked with that library file(s).
 
 For example (build with Gradle):
 
-    SHARED_V8_LIB_FILENAME=libv8.cr.so ./gradlew clean assemble
+    SHARED_V8_LIB_FILENAMES=libv8.cr.so ./gradlew clean assemble
     
 or
 
-    SHARED_V8_LIB_FILENAME=libv8.cr.so:libfoo.so ./gradlew clean assemble
+    SHARED_V8_LIB_FILENAMES=libv8.cr.so:libfoo.so ./gradlew clean assemble
     
 for multiple library files.
 
