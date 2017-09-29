@@ -23,7 +23,6 @@ import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
-import android.text.Html;
 import android.util.Log;
 
 import org.adblockplus.libadblockplus.android.Subscription;
