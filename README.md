@@ -104,7 +104,7 @@ For example (build with Gradle):
     
 or
 
-    SHARED_V8_LIB_FILENAMES=libv8.cr.so:libfoo.so ./gradlew clean assemble
+    SHARED_V8_LIB_FILENAMES=libv8.cr.so,libfoo.so ./gradlew clean assemble
     
 for multiple library files.
 
