@@ -362,7 +362,7 @@ public final class AdblockEngine
     JsValue jsSpecialization = jsSubscription.getProperty("specialization");
     try
     {
-      subscription.specialization = jsUrl.toString();
+      subscription.specialization = jsSpecialization.toString();
     }
     finally
     {
