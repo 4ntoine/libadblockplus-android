@@ -209,7 +209,7 @@ public class SharedPrefsStorage extends AdblockSettingsStorage
         // warning: saving `title`, `url` and `specialization` fields only
         editor.putString(getSubscriptionTitleKey(i), eachSubscription.title);
         editor.putString(getSubscriptionURLKey(i), eachSubscription.url);
-        editor.putString(getSubscriptionSpecializationKey(i), eachSubscription.url);
+        editor.putString(getSubscriptionSpecializationKey(i), eachSubscription.specialization);
       }
     }
   }
