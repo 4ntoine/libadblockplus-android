@@ -34,7 +34,7 @@ public class SharedPrefsStorage extends AdblockSettingsStorage
   private static final String SETTINGS_SUBSCRIPTIONS_KEY = "subscriptions";
   private static final String SETTINGS_SUBSCRIPTION_KEY = "subscription";
   private static final String SETTINGS_SUBSCRIPTION_URL_KEY = "url";
-  private static final String SETTINGS_SUBSCRIPTION_SPECIALIZATION_KEY = "spec";
+  private static final String SETTINGS_SUBSCRIPTION_SPECIALIZATION_KEY = "specialization";
   private static final String SETTINGS_SUBSCRIPTION_TITLE_KEY = "title";
   private static final String SETTINGS_WL_DOMAINS_KEY = "whitelisted_domains";
   private static final String SETTINGS_WL_DOMAIN_KEY = "domain";
