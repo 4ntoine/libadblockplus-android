@@ -23,6 +23,7 @@ import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
+import android.text.Html;
 import android.util.Log;
 
 import org.adblockplus.libadblockplus.android.Subscription;
@@ -175,7 +176,7 @@ public class GeneralSettingsFragment
     CharSequence[] availableSubscriptionsValues = new CharSequence[availableSubscriptions.length];
     for (int i = 0; i < availableSubscriptions.length; i++)
     {
-      availableSubscriptionsTitles[i] = availableSubscriptions[i].title;
+      availableSubscriptionsTitles[i] = availableSubscriptions[i].specialization;
       availableSubscriptionsValues[i] = availableSubscriptions[i].url;
     }
     filterLists.setEntries(availableSubscriptionsTitles);

@@ -359,6 +359,16 @@ public final class AdblockEngine
       jsUrl.dispose();
     }
 
+    JsValue jsSpecialization = jsSubscription.getProperty("specialization");
+    try
+    {
+      subscription.specialization = jsUrl.toString();
+    }
+    finally
+    {
+      jsSpecialization.dispose();
+    }
+
     return subscription;
   }
 
