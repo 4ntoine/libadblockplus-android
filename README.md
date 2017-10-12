@@ -110,7 +110,10 @@ for multiple library files.
 
 Note
   
+    [Configuration] Excluding shared v8 library libv8.cr.so from AAR
+    ...
     [Configuration] Linking dynamically with shared v8 library ./libadblockplus-binaries/android_armeabi-v7a/libv8.cr.so
+    ...
 
 output while building native library. 
 
