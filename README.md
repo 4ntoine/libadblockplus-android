@@ -115,7 +115,7 @@ Note
     [Configuration] Linking dynamically with shared v8 library ./libadblockplus-binaries/android_armeabi-v7a/libv8.cr.so
     ...
 
-output while building native library. 
+output while building. 
 
 ## Library tests
 
