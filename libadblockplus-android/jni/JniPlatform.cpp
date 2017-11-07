@@ -92,16 +92,17 @@ static void JNICALL JniDtor(JNIEnv* env, jclass clazz, jlong ptr)
   delete JniLongToTypePtr<JniPlatform>(ptr);
 }
 
-static void JNICALL JniSetUpJsEngine(JNIEnv* env, jclass clazz, jlong ptr, jobject jAppInfo, jlong v8IsolatePtr)
+static void JNICALL JniSetUpJsEngine(JNIEnv* env, jclass clazz,
+                                     jlong ptr, jobject jAppInfo, jlong v8IsolateProviderPtr)
 {
   try
   {
     AdblockPlus::AppInfo appInfo;
     TransformAppInfo(env, jAppInfo, appInfo);
     std::unique_ptr<AdblockPlus::IV8IsolateProvider> isolateProvider;
-    if (v8IsolatePtr)
+    if (v8IsolateProviderPtr)
     {
-      isolateProvider.reset(new V8IsolateHolder(JniLongToTypePtr<v8::Isolate>(v8IsolatePtr)));
+      isolateProvider.reset(JniLongToTypePtr<AdblockPlus::IV8IsolateProvider>(v8IsolateProviderPtr));
     }
 
     GetPlatformRef(ptr).SetUpJsEngine(appInfo, std::move(isolateProvider));
