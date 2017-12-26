@@ -28,9 +28,13 @@ android {
     }
 }
 
-
+def libadblockplus_flavor = System.getenv("LIBADBLOCKPLUS_FLAVOR")
+if (libadblockplus_flavor == null) {
+    libadblockplus_flavor = "abi_all"
+}
 
 dependencies {
-    compile project(':libadblockplus-android')
+    debugCompile project("path": ':libadblockplus-android', "configuration": libadblockplus_flavor + "Debug")
+    releaseCompile project("path": ':libadblockplus-android', "configuration": libadblockplus_flavor + "Release")
     compile 'com.android.support:support-v4:21.0.3'
 }
