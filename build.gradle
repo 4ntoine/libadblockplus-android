@@ -19,7 +19,7 @@ def getAbiFlavor() {
   if (matcher.find()) {
     return matcher.group(1).toLowerCase()
   } else {
-    return "abi_all";
+    return "abi_all"
   }
 }
 

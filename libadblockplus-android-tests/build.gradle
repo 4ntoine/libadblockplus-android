@@ -36,7 +36,7 @@ android {
 
       jni {
         dependencies {
-          project ":libadblockplus-android"
+          project(path: ":libadblockplus-android", configuration: getAbiFlavor() + "Debug")
         }
       }
     }

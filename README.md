@@ -117,13 +117,13 @@ Note
 
 output while building. 
 
-### Building for specific ARCH
+### Building for single ARCH
 
 By default libadblockplus-android is built for both ARM and x86 and it can be filtered when
-building android application. However sometimes it can be desired to build "libadblockplus-android.aar"
-for single ARCH.
+building end-user android application. However sometimes it can be desired to build
+"libadblockplus-android.aar" for single ARCH.
 
-Pass `abi_arm` or `abi_x86` to build it for single arch or `abi_all` for all archs:
+Pass `abi_arm` or `abi_x86` to build it for single arch or `abi_all` for all ARCHs:
 
     `./gradlew clean assembleAbi_arm`
     
