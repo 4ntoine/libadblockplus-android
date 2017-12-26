@@ -1,17 +1,17 @@
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-// flavor of "libadblockplus-android" module
-def getCurrentFlavor() {
+// ABI flavor of "libadblockplus-android" module
+def getAbiFlavor() {
   Gradle gradle = getGradle()
   String  tskReqStr = gradle.getStartParameter().getTaskRequests().toString()
 
   Pattern pattern;
 
   if (tskReqStr.contains("assemble")) {
-    pattern = Pattern.compile("assemble(\\w+)(Release|Debug)")
+    pattern = Pattern.compile("assemble(Abi_\\w{2,3})(Release|Debug)*(\\w*)")
   } else {
-    pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
+    pattern = Pattern.compile("generate(Abi_\\w{2,3})(Release|Debug)*(\\w*)")
   }
 
   Matcher matcher = pattern.matcher(tskReqStr)
@@ -38,4 +38,4 @@ subprojects {
   task listAllDependencies(type: DependencyReportTask) {}
 }
 
-println "[Configuration] Using libadblockplus-android flavor: " + getCurrentFlavor()
+println "[Configuration] Using libadblockplus-android ABI flavor: " + getAbiFlavor()

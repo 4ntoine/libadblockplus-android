@@ -44,7 +44,7 @@ android {
 }
 
 dependencies {
-  androidTestCompile project(path: ':libadblockplus-android', configuration: getCurrentFlavor() + "Debug")
+  androidTestCompile project(path: ':libadblockplus-android', configuration: getAbiFlavor() + "Debug")
   androidTestCompile project(':libadblockplus-android-settings')
   androidTestCompile fileTree(include: ['*.jar'], dir: 'libs')
 

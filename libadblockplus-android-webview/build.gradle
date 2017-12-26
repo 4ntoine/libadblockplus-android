@@ -29,6 +29,6 @@ android {
 }
 
 dependencies {
-  debugCompile project("path": ':libadblockplus-android', "configuration": getCurrentFlavor() + "Debug")
-  releaseCompile project("path": ':libadblockplus-android', "configuration": getCurrentFlavor() + "Release")
+  debugCompile project("path": ':libadblockplus-android', "configuration": getAbiFlavor() + "Debug")
+  releaseCompile project("path": ':libadblockplus-android', "configuration": getAbiFlavor() + "Release")
 }

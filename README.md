@@ -117,6 +117,22 @@ Note
 
 output while building. 
 
+### Building for specific ARCH
+
+By default libadblockplus-android is built for both ARM and x86 and it can be filtered when
+building android application. However sometimes it can be desired to build "libadblockplus-android.aar"
+for single ARCH.
+
+Pass `abi_arm` or `abi_x86` to build it for single arch or `abi_all` for all archs:
+
+    `./gradlew clean assembleAbi_arm`
+    
+Note
+
+    [Configuration] Using libadblockplus-android ABI flavor: abi_arm
+    
+output while building.
+
 ## Library tests
 
 Android tests for the library.
