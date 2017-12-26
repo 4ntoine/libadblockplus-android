@@ -1,3 +1,28 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+// flavor of "libadblockplus-android" module
+def getCurrentFlavor() {
+  Gradle gradle = getGradle()
+  String  tskReqStr = gradle.getStartParameter().getTaskRequests().toString()
+
+  Pattern pattern;
+
+  if (tskReqStr.contains("assemble")) {
+    pattern = Pattern.compile("assemble(\\w+)(Release|Debug)")
+  } else {
+    pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
+  }
+
+  Matcher matcher = pattern.matcher(tskReqStr)
+
+  if (matcher.find()) {
+    return matcher.group(1).toLowerCase()
+  } else {
+    return "abi_all";
+  }
+}
+
 buildscript {
   repositories {
     mavenLocal()
@@ -12,3 +37,5 @@ buildscript {
 subprojects {
   task listAllDependencies(type: DependencyReportTask) {}
 }
+
+println "[Configuration] Using libadblockplus-android flavor: " + getCurrentFlavor()

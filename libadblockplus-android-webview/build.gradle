@@ -28,12 +28,7 @@ android {
   }
 }
 
-def libadblockplus_flavor = System.getenv("LIBADBLOCKPLUS_FLAVOR")
-if (libadblockplus_flavor == null) {
-  libadblockplus_flavor = "abi_all"
-}
-
 dependencies {
-  debugCompile project("path": ':libadblockplus-android', "configuration": libadblockplus_flavor + "Debug")
-  releaseCompile project("path": ':libadblockplus-android', "configuration": libadblockplus_flavor + "Release")
+  debugCompile project("path": ':libadblockplus-android', "configuration": getCurrentFlavor() + "Debug")
+  releaseCompile project("path": ':libadblockplus-android', "configuration": getCurrentFlavor() + "Release")
 }
